@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum Operation {
+public enum Operation {
 	case Select([Column])
 	case Insert([(Column, SqlValue)])
 	case InsertOrReplace([(Column, SqlValue)])
@@ -17,14 +17,14 @@ enum Operation {
 	case Delete
 }
 
-struct Statement<T : Sqlable, Return> {
+public struct Statement<T : Sqlable, Return> {
 	let operation : Operation
 	let filterBy : Expression?
 	private let orderBy : [Order]
 	let limit : Int?
 	let single : Bool
 	
-	init(operation : Operation) {
+	public init(operation : Operation) {
 		self.operation = operation
 		self.filterBy = nil
 		self.orderBy = []
@@ -40,22 +40,22 @@ struct Statement<T : Sqlable, Return> {
 		self.single = single
 	}
 	
-	func filter(expression : Expression) -> Statement {
+	public func filter(expression : Expression) -> Statement {
 		guard filterBy == nil else { fatalError("You can only add one filter to an expression. Combine filters with &&") }
 		
 		return Statement(operation: operation, filter: expression, orderBy: orderBy, limit: limit, single: single)
 	}
 	
-	func orderBy(column : Column, _ direction : Order.Direction = .Asc) -> Statement {
+	public func orderBy(column : Column, _ direction : Order.Direction = .Asc) -> Statement {
 		let order = Order(column, direction)
 		return Statement(operation: operation, filter: filterBy, orderBy: orderBy + [order], limit: limit, single: single)
 	}
 	
-	func limit(limit : Int) -> Statement {
+	public func limit(limit : Int) -> Statement {
 		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: single)
 	}
 	
-	func singleResult() -> Statement {
+	public func singleResult() -> Statement {
 		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: true)
 	}
 	
@@ -117,13 +117,13 @@ struct Statement<T : Sqlable, Return> {
 		return values
 	}
 	
-	func run(db : SqliteDatabase) throws -> Return {
+	public func run(db : SqliteDatabase) throws -> Return {
 		return try db.run(self) as! Return
 	}
 }
 
-struct Order : SqlPrintable {
-	enum Direction {
+public struct Order : SqlPrintable {
+	public enum Direction {
 		case Asc
 		case Desc
 	}
@@ -131,12 +131,12 @@ struct Order : SqlPrintable {
 	let column : Column
 	let direction : Direction
 	
-	init(_ column : Column, _ direction : Direction) {
+	public init(_ column : Column, _ direction : Direction) {
 		self.column = column
 		self.direction = direction
 	}
 	
-	var sqlDescription : String {
+	public var sqlDescription : String {
 		return "\(column.name) " + (direction == .Desc ? "desc" : "")
 	}
 }

@@ -12,7 +12,7 @@ protocol ColumnOption : SqlPrintable {
 	
 }
 
-struct PrimaryKey : ColumnOption {
+public struct PrimaryKey : ColumnOption {
 	let autoincrement : Bool
 	
 	var sqlDescription : String {
@@ -20,7 +20,7 @@ struct PrimaryKey : ColumnOption {
 	}
 }
 
-enum Rule : SqlPrintable {
+public enum Rule : SqlPrintable {
 	case Ignore, Cascade, SetNull, SetDefault
 	
 	var sqlDescription : String {
@@ -33,7 +33,7 @@ enum Rule : SqlPrintable {
 	}
 }
 
-struct ForeignKey<To : Sqlable> : ColumnOption, SqlPrintable {
+public struct ForeignKey<To : Sqlable> : ColumnOption, SqlPrintable {
 	let column : String
 	let onDelete : Rule
 	let onUpdate : Rule
@@ -49,7 +49,7 @@ struct ForeignKey<To : Sqlable> : ColumnOption, SqlPrintable {
 	}
 }
 
-struct Column : Equatable {
+public struct Column : Equatable {
 	let name : String
 	let type : SqlType
 	let options : [ColumnOption]
@@ -61,11 +61,11 @@ struct Column : Equatable {
 	}
 }
 
-func ==(lhs : Column, rhs : Column) -> Bool {
+public func ==(lhs : Column, rhs : Column) -> Bool {
 	return lhs.name == rhs.name && lhs.type == rhs.type
 }
 
-func ~=(lhs : Column, rhs : Column) -> Bool {
+public func ~=(lhs : Column, rhs : Column) -> Bool {
 	return lhs.name == rhs.name
 }
 
@@ -82,7 +82,7 @@ extension Column : SqlPrintable {
 	}
 }
 
-indirect enum Expression : SqlPrintable {
+public indirect enum Expression : SqlPrintable {
 	case And(Expression, Expression)
 	case Or(Expression, Expression)
 	case EqualsValue(Column, SqlValue)
@@ -121,42 +121,42 @@ indirect enum Expression : SqlPrintable {
 	}
 }
 
-func ==(lhs : Column, rhs : SqlValue) -> Expression {
+public func ==(lhs : Column, rhs : SqlValue) -> Expression {
 	return .EqualsValue(lhs, rhs)
 }
 
-func !=(lhs : Column, rhs : SqlValue) -> Expression {
+public func !=(lhs : Column, rhs : SqlValue) -> Expression {
 	return .Inverse(.EqualsValue(lhs, rhs))
 }
 
-func <(lhs : Column, rhs : SqlValue) -> Expression {
+public func <(lhs : Column, rhs : SqlValue) -> Expression {
 	return .LessThan(lhs, rhs)
 }
 
-func <=(lhs : Column, rhs : SqlValue) -> Expression {
+public func <=(lhs : Column, rhs : SqlValue) -> Expression {
 	return .LessThanOrEqual(lhs, rhs)
 }
 
-func >(lhs : Column, rhs : SqlValue) -> Expression {
+public func >(lhs : Column, rhs : SqlValue) -> Expression {
 	return .GreaterThan(lhs, rhs)
 }
 
-func >=(lhs : Column, rhs : SqlValue) -> Expression {
+public func >=(lhs : Column, rhs : SqlValue) -> Expression {
 	return .GreaterThanOrEqual(lhs, rhs)
 }
 
-func &&(lhs : Expression, rhs : Expression) -> Expression {
+public func &&(lhs : Expression, rhs : Expression) -> Expression {
 	return .And(lhs, rhs)
 }
 
-func ||(lhs : Expression, rhs : Expression) -> Expression {
+public func ||(lhs : Expression, rhs : Expression) -> Expression {
 	return .Or(lhs, rhs)
 }
 
-prefix func !(value : Expression) -> Expression {
+public prefix func !(value : Expression) -> Expression {
 	return .Inverse(value)
 }
 
-prefix func !(column : Column) -> Expression {
+public prefix func !(column : Column) -> Expression {
 	return column == Null()
 }

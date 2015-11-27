@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum SqlType : Equatable {
+public enum SqlType : Equatable {
 	case Integer
 	case Real
 	case Text
@@ -17,7 +17,7 @@ enum SqlType : Equatable {
 	indirect case Nullable(SqlType)
 }
 
-func ==(lhs : SqlType, rhs : SqlType) -> Bool {
+public func ==(lhs : SqlType, rhs : SqlType) -> Bool {
 	switch (lhs, rhs) {
 	case (.Integer, .Integer): fallthrough
 	case (.Real, .Real): fallthrough

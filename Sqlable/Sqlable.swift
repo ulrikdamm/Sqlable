@@ -8,7 +8,7 @@
 
 import Foundation
 
-protocol Sqlable {
+public protocol Sqlable {
 	static var tableName : String { get }
 	static var tableLayout : [Column] { get }
 	
@@ -16,7 +16,7 @@ protocol Sqlable {
 	init(row : ReadRow<Self>) throws
 }
 
-extension Sqlable {
+public extension Sqlable {
 	static var tableName : String {
 		let typeName = "table_\(Mirror(reflecting: self).subjectType)"
 		return typeName

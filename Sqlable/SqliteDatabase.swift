@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum SqlError : ErrorType {
+public enum SqlError : ErrorType {
 	case ParseError(String)
 	case ReadError(String)
 	case SqliteError(Int, String?)
@@ -19,10 +19,10 @@ protocol SqlPrintable {
 	var sqlDescription : String { get }
 }
 
-class SqliteDatabase {
+public class SqliteDatabase {
 	let db : COpaquePointer!
 	
-	let debug = false
+	public var debug = false
 	
 	static let SQLITE_STATIC = unsafeBitCast(0, sqlite3_destructor_type.self)
 	static let SQLITE_TRANSIENT = unsafeBitCast(-1, sqlite3_destructor_type.self)
@@ -32,10 +32,10 @@ class SqliteDatabase {
 	var inTransaction = false
 	var updated = false
 	
-	var didUpdate : (Void -> Void)?
-	var didFail : (String -> Void)?
+	public  var didUpdate : (Void -> Void)?
+	public  var didFail : (String -> Void)?
 	
-	init(filepath : String) throws {
+	public init(filepath : String) throws {
 		do {
 			db = try SqliteDatabase.openDatabase(filepath)
 		} catch let error {
@@ -73,7 +73,7 @@ class SqliteDatabase {
 		sqlite3_close(db)
 	}
 	
-	func fail(error : ErrorType) {
+	public func fail(error : ErrorType) {
 		let message : String
 		
 		if let error = error as? SqlError {
@@ -99,7 +99,7 @@ class SqliteDatabase {
 		}
 	}
 	
-	func execute(statement : String) throws {
+	public func execute(statement : String) throws {
 		let sql = statement.cStringUsingEncoding(NSUTF8StringEncoding)!
 		
 		if debug { print("\(inTransaction ? "  " : "")SQL: \(statement)") }
@@ -109,12 +109,12 @@ class SqliteDatabase {
 		}
 	}
 	
-	func beginTransaction() throws {
+	public func beginTransaction() throws {
 		try execute("begin transaction")
 		inTransaction = true
 	}
 	
-	func commitTransaction() throws {
+	public func commitTransaction() throws {
 		try execute("commit transaction")
 		inTransaction = false
 		
@@ -124,20 +124,20 @@ class SqliteDatabase {
 		}
 	}
 	
-	func rollbackTransaction() throws {
+	public func rollbackTransaction() throws {
 		try execute("rollback transaction")
 		inTransaction = false
 		updated = false
 	}
 	
-	func transaction<T>(block : SqliteDatabase throws -> T) throws -> T {
+	public func transaction<T>(block : SqliteDatabase throws -> T) throws -> T {
 		try beginTransaction()
 		let value = try block(self)
 		try commitTransaction()
 		return value
 	}
 	
-	func createTable<T : Sqlable>(_ : T.Type) throws {
+	public func createTable<T : Sqlable>(_ : T.Type) throws {
 		try execute(T.createTable())
 		update()
 	}
