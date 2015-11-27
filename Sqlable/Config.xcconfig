@@ -1,0 +1,17 @@
+//
+//  Config.xcconfig
+//  Sqlable
+//
+//  Created by Ulrik Damm on 27/11/2015.
+//  Copyright © 2015 Ufd.dk. All rights reserved.
+//
+
+INFOPLIST_FILE = Sqlable/Info.plist
+
+PRODUCT_BUNDLE_IDENTIFIER = dk.ufd.Sqlable
+
+APPLICATION_EXTENSION_API_ONLY = YES
+
+PRODUCT_NAME = Sqlable
+
+OTHER_LDFLAGS = -lsqlite3

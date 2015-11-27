@@ -7,9 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FF580D441C088B7400751A5D /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = FF580D431C088B7400751A5D /* libsqlite3.tbd */; };
 		FF94F2D81BDE2634009AD0C9 /* Sqlable.h in Headers */ = {isa = PBXBuildFile; fileRef = FF94F2D71BDE2634009AD0C9 /* Sqlable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FF94F2DF1BDE2634009AD0C9 /* Sqlable.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF94F2D41BDE2633009AD0C9 /* Sqlable.framework */; };
 		FF94F2E41BDE2634009AD0C9 /* SqlableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF94F2E31BDE2634009AD0C9 /* SqlableTests.swift */; };
+		FF94F2EF1BDE264B009AD0C9 /* SqliteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF94F2EE1BDE264B009AD0C9 /* SqliteDatabase.swift */; };
+		FF94F2F01BDE264B009AD0C9 /* SqliteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF94F2EE1BDE264B009AD0C9 /* SqliteDatabase.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -23,12 +26,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FF580D411C088A9300751A5D /* module.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.map; sourceTree = "<group>"; };
+		FF580D421C088AC900751A5D /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		FF580D431C088B7400751A5D /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		FF94F2D41BDE2633009AD0C9 /* Sqlable.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Sqlable.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF94F2D71BDE2634009AD0C9 /* Sqlable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Sqlable.h; sourceTree = "<group>"; };
 		FF94F2D91BDE2634009AD0C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FF94F2DE1BDE2634009AD0C9 /* SqlableTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SqlableTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF94F2E31BDE2634009AD0C9 /* SqlableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SqlableTests.swift; sourceTree = "<group>"; };
 		FF94F2E51BDE2634009AD0C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FF94F2EE1BDE264B009AD0C9 /* SqliteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SqliteDatabase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +43,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FF580D441C088B7400751A5D /* libsqlite3.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,7 +80,11 @@
 			isa = PBXGroup;
 			children = (
 				FF94F2D71BDE2634009AD0C9 /* Sqlable.h */,
+				FF94F2EE1BDE264B009AD0C9 /* SqliteDatabase.swift */,
 				FF94F2D91BDE2634009AD0C9 /* Info.plist */,
+				FF580D411C088A9300751A5D /* module.map */,
+				FF580D421C088AC900751A5D /* Config.xcconfig */,
+				FF580D431C088B7400751A5D /* libsqlite3.tbd */,
 			);
 			path = Sqlable;
 			sourceTree = "<group>";
@@ -194,6 +206,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FF94F2EF1BDE264B009AD0C9 /* SqliteDatabase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -201,6 +214,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FF94F2F01BDE264B009AD0C9 /* SqliteDatabase.swift in Sources */,
 				FF94F2E41BDE2634009AD0C9 /* SqlableTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -308,6 +322,7 @@
 		FF94F2E91BDE2634009AD0C9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -315,15 +330,18 @@
 				INFOPLIST_FILE = Sqlable/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = Sqlable/module.map;
 				PRODUCT_BUNDLE_IDENTIFIER = dk.ufd.Sqlable;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		FF94F2EA1BDE2634009AD0C9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -331,6 +349,7 @@
 				INFOPLIST_FILE = Sqlable/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = Sqlable/module.map;
 				PRODUCT_BUNDLE_IDENTIFIER = dk.ufd.Sqlable;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -376,6 +395,7 @@
 				FF94F2EA1BDE2634009AD0C9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		FF94F2EB1BDE2634009AD0C9 /* Build configuration list for PBXNativeTarget "SqlableTests" */ = {
 			isa = XCConfigurationList;
@@ -384,6 +404,7 @@
 				FF94F2ED1BDE2634009AD0C9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
