@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <Sqlite3.h>
 
 //! Project version number for Sqlable.
 FOUNDATION_EXPORT double SqlableVersionNumber;
