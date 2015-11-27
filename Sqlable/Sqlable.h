@@ -6,8 +6,8 @@
 //  Copyright © 2015 Ufd.dk. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
-#import <Sqlite3.h>
+@import Foundation;
+#import "sqlite3.h"
 
 //! Project version number for Sqlable.
 FOUNDATION_EXPORT double SqlableVersionNumber;
