@@ -8,11 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		FF580D441C088B7400751A5D /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = FF580D431C088B7400751A5D /* libsqlite3.tbd */; };
+		FF580D841C088D1E00751A5D /* SqliteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF580D7D1C088D1E00751A5D /* SqliteDatabase.swift */; };
+		FF580D851C088D1E00751A5D /* Sqlable.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF580D7E1C088D1E00751A5D /* Sqlable.swift */; };
+		FF580D861C088D1E00751A5D /* Column.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF580D7F1C088D1E00751A5D /* Column.swift */; };
+		FF580D871C088D1E00751A5D /* Statement.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF580D801C088D1E00751A5D /* Statement.swift */; };
+		FF580D881C088D1E00751A5D /* ReadRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF580D811C088D1E00751A5D /* ReadRow.swift */; };
+		FF580D891C088D1E00751A5D /* SqlType.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF580D821C088D1E00751A5D /* SqlType.swift */; };
+		FF580D8A1C088D1E00751A5D /* SqlValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF580D831C088D1E00751A5D /* SqlValue.swift */; };
 		FF94F2D81BDE2634009AD0C9 /* Sqlable.h in Headers */ = {isa = PBXBuildFile; fileRef = FF94F2D71BDE2634009AD0C9 /* Sqlable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FF94F2DF1BDE2634009AD0C9 /* Sqlable.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF94F2D41BDE2633009AD0C9 /* Sqlable.framework */; };
 		FF94F2E41BDE2634009AD0C9 /* SqlableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF94F2E31BDE2634009AD0C9 /* SqlableTests.swift */; };
-		FF94F2EF1BDE264B009AD0C9 /* SqliteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF94F2EE1BDE264B009AD0C9 /* SqliteDatabase.swift */; };
-		FF94F2F01BDE264B009AD0C9 /* SqliteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF94F2EE1BDE264B009AD0C9 /* SqliteDatabase.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,13 +34,19 @@
 		FF580D411C088A9300751A5D /* module.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.map; sourceTree = "<group>"; };
 		FF580D421C088AC900751A5D /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		FF580D431C088B7400751A5D /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		FF580D7D1C088D1E00751A5D /* SqliteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SqliteDatabase.swift; sourceTree = "<group>"; };
+		FF580D7E1C088D1E00751A5D /* Sqlable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sqlable.swift; sourceTree = "<group>"; };
+		FF580D7F1C088D1E00751A5D /* Column.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Column.swift; sourceTree = "<group>"; };
+		FF580D801C088D1E00751A5D /* Statement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Statement.swift; sourceTree = "<group>"; };
+		FF580D811C088D1E00751A5D /* ReadRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadRow.swift; sourceTree = "<group>"; };
+		FF580D821C088D1E00751A5D /* SqlType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SqlType.swift; sourceTree = "<group>"; };
+		FF580D831C088D1E00751A5D /* SqlValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SqlValue.swift; sourceTree = "<group>"; };
 		FF94F2D41BDE2633009AD0C9 /* Sqlable.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Sqlable.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF94F2D71BDE2634009AD0C9 /* Sqlable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Sqlable.h; sourceTree = "<group>"; };
 		FF94F2D91BDE2634009AD0C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FF94F2DE1BDE2634009AD0C9 /* SqlableTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SqlableTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF94F2E31BDE2634009AD0C9 /* SqlableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SqlableTests.swift; sourceTree = "<group>"; };
 		FF94F2E51BDE2634009AD0C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		FF94F2EE1BDE264B009AD0C9 /* SqliteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SqliteDatabase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,8 +90,14 @@
 		FF94F2D61BDE2634009AD0C9 /* Sqlable */ = {
 			isa = PBXGroup;
 			children = (
+				FF580D7D1C088D1E00751A5D /* SqliteDatabase.swift */,
+				FF580D7E1C088D1E00751A5D /* Sqlable.swift */,
+				FF580D7F1C088D1E00751A5D /* Column.swift */,
+				FF580D801C088D1E00751A5D /* Statement.swift */,
+				FF580D811C088D1E00751A5D /* ReadRow.swift */,
+				FF580D821C088D1E00751A5D /* SqlType.swift */,
+				FF580D831C088D1E00751A5D /* SqlValue.swift */,
 				FF94F2D71BDE2634009AD0C9 /* Sqlable.h */,
-				FF94F2EE1BDE264B009AD0C9 /* SqliteDatabase.swift */,
 				FF94F2D91BDE2634009AD0C9 /* Info.plist */,
 				FF580D411C088A9300751A5D /* module.map */,
 				FF580D421C088AC900751A5D /* Config.xcconfig */,
@@ -206,7 +223,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FF94F2EF1BDE264B009AD0C9 /* SqliteDatabase.swift in Sources */,
+				FF580D851C088D1E00751A5D /* Sqlable.swift in Sources */,
+				FF580D881C088D1E00751A5D /* ReadRow.swift in Sources */,
+				FF580D891C088D1E00751A5D /* SqlType.swift in Sources */,
+				FF580D841C088D1E00751A5D /* SqliteDatabase.swift in Sources */,
+				FF580D861C088D1E00751A5D /* Column.swift in Sources */,
+				FF580D8A1C088D1E00751A5D /* SqlValue.swift in Sources */,
+				FF580D871C088D1E00751A5D /* Statement.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -214,7 +237,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FF94F2F01BDE264B009AD0C9 /* SqliteDatabase.swift in Sources */,
 				FF94F2E41BDE2634009AD0C9 /* SqlableTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
