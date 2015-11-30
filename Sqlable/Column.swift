@@ -15,6 +15,10 @@ public protocol ColumnOption : SqlPrintable {
 public struct PrimaryKey : ColumnOption {
 	public let autoincrement : Bool
 	
+	public init(autoincrement : Bool) {
+		self.autoincrement = autoincrement
+	}
+	
 	public var sqlDescription : String {
 		return "primary key" + (autoincrement ? " autoincrement" : "")
 	}
