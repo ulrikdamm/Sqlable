@@ -15,7 +15,7 @@ public enum SqlError : ErrorType {
 	case OpenError
 }
 
-protocol SqlPrintable {
+public protocol SqlPrintable {
 	var sqlDescription : String { get }
 }
 

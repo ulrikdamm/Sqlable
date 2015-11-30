@@ -8,14 +8,14 @@
 
 import Foundation
 
-protocol ColumnOption : SqlPrintable {
+public protocol ColumnOption : SqlPrintable {
 	
 }
 
 public struct PrimaryKey : ColumnOption {
-	let autoincrement : Bool
+	public let autoincrement : Bool
 	
-	var sqlDescription : String {
+	public var sqlDescription : String {
 		return "primary key" + (autoincrement ? " autoincrement" : "")
 	}
 }
@@ -23,7 +23,7 @@ public struct PrimaryKey : ColumnOption {
 public enum Rule : SqlPrintable {
 	case Ignore, Cascade, SetNull, SetDefault
 	
-	var sqlDescription : String {
+	public var sqlDescription : String {
 		switch self {
 		case .Ignore: return "no action"
 		case .Cascade: return "cascade"
@@ -34,27 +34,27 @@ public enum Rule : SqlPrintable {
 }
 
 public struct ForeignKey<To : Sqlable> : ColumnOption, SqlPrintable {
-	let column : String
-	let onDelete : Rule
-	let onUpdate : Rule
+	public let column : String
+	public let onDelete : Rule
+	public let onUpdate : Rule
 	
-	init(column : String = "id", onDelete : Rule = .Ignore, onUpdate : Rule = .Ignore) {
+	public init(column : String = "id", onDelete : Rule = .Ignore, onUpdate : Rule = .Ignore) {
 		self.column = column
 		self.onDelete = onDelete
 		self.onUpdate = onUpdate
 	}
 	
-	var sqlDescription : String {
+	public var sqlDescription : String {
 		return "references \(To.tableName)(\(column)) on update \(onUpdate.sqlDescription) on delete \(onDelete.sqlDescription)"
 	}
 }
 
 public struct Column : Equatable {
-	let name : String
-	let type : SqlType
-	let options : [ColumnOption]
+	public let name : String
+	public let type : SqlType
+	public let options : [ColumnOption]
 	
-	init(_ name : String, _ type : SqlType, _ options : ColumnOption...) {
+	public init(_ name : String, _ type : SqlType, _ options : ColumnOption...) {
 		self.name = name
 		self.type = type
 		self.options = options
@@ -70,7 +70,7 @@ public func ~=(lhs : Column, rhs : Column) -> Bool {
 }
 
 extension Column : SqlPrintable {
-	var sqlDescription : String {
+	public var sqlDescription : String {
 		var statement = "\(name) \(type.sqlDescription)"
 		
 		if options.count > 0 {
@@ -92,7 +92,7 @@ public indirect enum Expression : SqlPrintable {
 	case GreaterThan(Column, SqlValue)
 	case GreaterThanOrEqual(Column, SqlValue)
 	
-	var sqlDescription : String {
+	public var sqlDescription : String {
 		switch self {
 		case .And(let lhs, let rhs): return "(\(lhs.sqlDescription)) and (\(rhs.sqlDescription))"
 		case .Or(let lhs, let rhs): return "(\(lhs.sqlDescription)) or (\(rhs.sqlDescription))"

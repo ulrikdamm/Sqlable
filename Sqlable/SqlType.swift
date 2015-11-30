@@ -30,7 +30,7 @@ public func ==(lhs : SqlType, rhs : SqlType) -> Bool {
 }
 
 extension SqlType : SqlPrintable {
-	var sqlDescription : String {
+	public var sqlDescription : String {
 		switch self {
 		case .Integer: return "integer not null"
 		case .Real: return "double not null"
