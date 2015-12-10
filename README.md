@@ -191,42 +191,32 @@ When you make a struct Sqlable, it gains instance- and static methods for return
 
 The query DSL supports following operators:
 
-Is equal:
-`column == value (e.g. Bicycle.id == 1)`
+Is equal: `column == value (e.g. Bicycle.id == 1)`
 
-Is not equal:
-`column != value`
+Is not equal: `column != value`
 
-Is less than:
-`column < value`
+Is less than: `column < value`
 
-Is less than or equal:
-`column <= value`
+Is less than or equal: `column <= value`
 
-Is greater than:
-`column > value`
+Is greater than: `column > value`
 
-Is greater than or equal:
-`column => value`
+Is greater than or equal: `column => value`
 
-And:
-`expression && expression`
+And: `expression && expression`
 
-Or:
-`expression || expression`
+Or: `expression || expression`
 
-Inverse:
-`!expression`
+Inverse: `!expression`
 
-Is null:
-`!column`
+Is null: `!column`
 
-Contains:
-`column ∈ [value]`
-`contains(column, value)`
+Contains: `column ∈ [value]` or `contains(column, value)`
 
 `column` means an instance of a Column struct, e.g. `Bicycle.id`.
+
 `value` means any value that works with SQL, like Int, String, Double, etc.
+
 `expression` is anything returned by one of these operators
 
 ## Who made this?
