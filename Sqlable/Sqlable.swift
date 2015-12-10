@@ -53,12 +53,6 @@ public extension Sqlable {
 	}
 	
 	@warn_unused_result
-	func insertOrReplace() -> Statement<Self, Void> {
-		let values = Self.tableLayout.flatMap { column in valueForColumn(column).flatMap { (column, $0) } }
-		return Statement(operation: .InsertOrReplace(values))
-	}
-	
-	@warn_unused_result
 	func delete() -> Statement<Self, Void> {
 		guard let primaryColumn = Self.primaryColumn() else { fatalError("\(self) doesn't have a primary key") }
 		guard let primaryValue = valueForColumn(primaryColumn) else { fatalError("\(self) doesn't have a primary key value") }

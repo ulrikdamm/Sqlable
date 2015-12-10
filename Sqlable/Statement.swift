@@ -11,10 +11,15 @@ import Foundation
 public enum Operation {
 	case Select([Column])
 	case Insert([(Column, SqlValue)])
-	case InsertOrReplace([(Column, SqlValue)])
 	case Update([(Column, SqlValue)])
 	case Count
 	case Delete
+}
+
+public enum OnConflict {
+	case Abort
+	case Ignore
+	case Replace
 }
 
 public struct Statement<T : Sqlable, Return> {
@@ -23,6 +28,7 @@ public struct Statement<T : Sqlable, Return> {
 	private let orderBy : [Order]
 	let limit : Int?
 	let single : Bool
+	let onConflict : OnConflict
 	
 	public init(operation : Operation) {
 		self.operation = operation
@@ -30,37 +36,50 @@ public struct Statement<T : Sqlable, Return> {
 		self.orderBy = []
 		self.limit = nil
 		self.single = false
+		self.onConflict = .Abort
 	}
 	
-	private init(operation : Operation, filter : Expression? = nil, orderBy : [Order] = [], limit : Int? = nil, single : Bool = false) {
+	private init(operation : Operation, filter : Expression? = nil, orderBy : [Order] = [], limit : Int? = nil, single : Bool = false, onConflict : OnConflict = .Abort) {
 		self.operation = operation
 		self.filterBy = filter
 		self.orderBy = orderBy
 		self.limit = limit
 		self.single = single
+		self.onConflict = onConflict
 	}
 	
 	public func filter(expression : Expression) -> Statement {
 		guard filterBy == nil else { fatalError("You can only add one filter to an expression. Combine filters with &&") }
 		
-		return Statement(operation: operation, filter: expression, orderBy: orderBy, limit: limit, single: single)
+		return Statement(operation: operation, filter: expression, orderBy: orderBy, limit: limit, single: single, onConflict: onConflict)
 	}
 	
 	public func orderBy(column : Column, _ direction : Order.Direction = .Asc) -> Statement {
 		let order = Order(column, direction)
-		return Statement(operation: operation, filter: filterBy, orderBy: orderBy + [order], limit: limit, single: single)
+		return Statement(operation: operation, filter: filterBy, orderBy: orderBy + [order], limit: limit, single: single, onConflict: onConflict)
 	}
 	
 	public func limit(limit : Int) -> Statement {
-		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: single)
+		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: single, onConflict: onConflict)
 	}
 	
 	public func singleResult() -> Statement {
-		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: true)
+		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: true, onConflict: onConflict)
+	}
+	
+	public func ignoreOnConflict() -> Statement {
+		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: single, onConflict: .Ignore)
 	}
 	
 	var sqlDescription : String {
 		var sql : [String]
+		
+		let conflict : String
+		switch onConflict {
+		case .Abort: conflict = "or abort"
+		case .Ignore: conflict = "or ignore"
+		case .Replace: conflict = "or replace"
+		}
 		
 		switch operation {
 		case .Select(let columns):
@@ -69,14 +88,10 @@ public struct Statement<T : Sqlable, Return> {
 		case .Insert(let ops):
 			let columnNames = ops.map { column, value in column.name }.joinWithSeparator(", ")
 			let values = ops.map { _ in "?" }.joinWithSeparator(", ")
-			sql = ["insert into \(T.tableName) (\(columnNames)) values (\(values))"]
+			sql = ["insert \(conflict) into \(T.tableName) (\(columnNames)) values (\(values))"]
 		case .Update(let ops):
 			let values = ops.map { column, _ in "\(column.name) = ?" }.joinWithSeparator(", ")
-			sql = ["update \(T.tableName) set \(values)"]
-		case .InsertOrReplace(let ops):
-			let columnNames = ops.map { column, value in column.name }.joinWithSeparator(", ")
-			let values = ops.map { _ in "?" }.joinWithSeparator(", ")
-			sql = ["insert or replace into \(T.tableName) (\(columnNames)) values (\(values))"]
+			sql = ["update \(conflict) \(T.tableName) set \(values)"]
 		case .Count:
 			sql = ["select count(*) from \(T.tableName)"]
 		case .Delete:
@@ -105,7 +120,6 @@ public struct Statement<T : Sqlable, Return> {
 		case .Select(_): break
 		case .Insert(let ops): values += ops.map { column, value in value }
 		case .Update(let ops): values += ops.map { column, value in value }
-		case .InsertOrReplace(let ops): values += ops.map { column, value in value }
 		case .Count: break
 		case .Delete: break
 		}

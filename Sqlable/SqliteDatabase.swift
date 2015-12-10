@@ -157,9 +157,7 @@ public class SqliteDatabase {
 		let returnValue : Any
 		
 		switch statement.operation {
-		case .Delete: fallthrough
-		case .InsertOrReplace: fallthrough
-		case .Update:
+		case .Update, .Delete:
 			if sqlite3_step(handle) != SQLITE_DONE {
 				try throwLastError(db)
 			}
@@ -212,6 +210,6 @@ func throwLastError(db : COpaquePointer) throws {
 	let errorCode = Int(sqlite3_errcode(db))
 	let reason = String.fromCString(sqlite3_errmsg(db))
 	
-	print("SQL ERROR: \(errorCode) \(reason)")
+	fatalError("SQL ERROR \(errorCode): \(reason ?? "Unknown error")")
 	throw SqlError.SqliteError(errorCode, reason)
 }
