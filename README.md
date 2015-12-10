@@ -2,11 +2,11 @@
 
 Sqlable is a Swift library for storing data in a SQLite database easy as pie. Create a struct, make it Sqlable, and then read, write, update and delete to your heart’s content!
 
-# Why would I want that?
+## Why would I want that?
 
 Persistence is often a pain when making iOS apps. If you want to only use 1st party frameworks from Apple, your choice is either Core Data, or serializing to JSON or plist files. there’s a few nice 3rd party options, like Realm, but that’s mostly active objects doing a lot of dynamic things behind your back. If you want to just operate on plain structs, and just want to read and write to a database, Sqlable is the simplest option.
 
-# Show me how to use it!
+## Show me how to use it!
 
 Suppose you have this struct:
 
@@ -85,9 +85,9 @@ try bike.update().run(db)
 try bike.delete().run(db)
 ```
 
-# What other cool features does it have?
+## What other cool features does it have?
 
-## Transactions
+### Transactions
 
 ```swift
 try db.transaction { db in
@@ -99,7 +99,7 @@ try db.transaction { db in
 
 (*Nested transactions are coming soon*)
 
-## Foreign key constraints
+### Foreign key constraints
 
 ```swift
 extension Bicycle : Sqlable {
@@ -115,13 +115,13 @@ extension Bicycle : Sqlable {
 	...
 ```
 
-## DSL for query filters
+### DSL for query filters
 
 ```swift
 Bicycle.read().filter(Bicycle.color == "red" && !(Bicycle.id == 0 || Bicycle.id > 1000))
 ```
 
-## Update callback
+### Update callback
 
 Register the `didUpdate` callback on your database handler to get notified when anything changes:
 
@@ -131,7 +131,7 @@ db.didUpdate = {
 }
 ```
 
-## Swift style error handling
+### Swift style error handling
 
 Every function call that can fail is marked with throws, so you can handle every error that can possibly happen.
 
@@ -153,7 +153,7 @@ db.didFail = { error in
 }
 ```
 
-# How do I install it?
+## How do I install it?
 
 If you’re using Carthage (you should!), just add this to your Cartfile:
 
@@ -169,7 +169,7 @@ import Sqlable
 
 And you’re good to go!
 
-# Which features are coming soon?
+## Which features are coming soon?
 
 • Nested transactions
 
@@ -181,13 +181,13 @@ And you’re good to go!
 
 • Update callbacks with change information
 
-# More technical details
+## More technical details
 
-## Statements
+### Statements
 
 When you make a struct Sqlable, it gains instance- and static methods for returning statements. These methods are `read`, `count`, `insert`, `update` and `delete`. All these returns a Statement struct, which you can then modify (with .filter, .limit, .onConflict, .orderBy). The statement is just an immutable struct, no magic going on. You can save it, serialize it, etc. When you want to run the statement, you just call the run method, which takes a database handler to run it in, and might throw an error, or give you a result. The type of the result depends on which initial method created the statement.
 
-## Query DSL
+### Query DSL
 
 The query DSL supports following operators:
 
@@ -229,7 +229,7 @@ Contains:
 `value` means any value that works with SQL, like Int, String, Double, etc.
 `expression` is anything returned by one of these operators
 
-# Who made this?
+## Who made this?
 
 I did. My name is Ulrik Flænø Damm, I’m an iOS developer at Robocat in Copenhagen. You can [follow me on Twitter](https://twitter.com/ulrikdamm), or visit [my website](https://ufd.dk).
 
