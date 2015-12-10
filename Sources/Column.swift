@@ -6,8 +6,6 @@
 //  Copyright © 2015 Robocat. All rights reserved.
 //
 
-import Foundation
-
 public protocol ColumnOption : SqlPrintable {
 	
 }

@@ -48,6 +48,7 @@
 		FF94F2DE1BDE2634009AD0C9 /* SqlableTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SqlableTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF94F2E31BDE2634009AD0C9 /* SqlableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SqlableTests.swift; sourceTree = "<group>"; };
 		FF94F2E51BDE2634009AD0C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FFCD6A981C1A1B240021ED87 /* Package.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,7 +74,10 @@
 		FF94F2CA1BDE2633009AD0C9 = {
 			isa = PBXGroup;
 			children = (
-				FF94F2D61BDE2634009AD0C9 /* Sqlable */,
+				FFCD6A9A1C1A1B6A0021ED87 /* Supporting files */,
+				FFCD6A981C1A1B240021ED87 /* Package.swift */,
+				FF94F2D61BDE2634009AD0C9 /* Sources */,
+				FFCD6A9B1C1A1B790021ED87 /* Frameworks */,
 				FF94F2E21BDE2634009AD0C9 /* SqlableTests */,
 				FF94F2D51BDE2633009AD0C9 /* Products */,
 			);
@@ -88,11 +92,9 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		FF94F2D61BDE2634009AD0C9 /* Sqlable */ = {
+		FF94F2D61BDE2634009AD0C9 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				FF94F2D71BDE2634009AD0C9 /* Sqlable.h */,
-				FF580D901C08915600751A5D /* sqlite3.h */,
 				FF580D7D1C088D1E00751A5D /* SqliteDatabase.swift */,
 				FF580D7E1C088D1E00751A5D /* Sqlable.swift */,
 				FF580D7F1C088D1E00751A5D /* Column.swift */,
@@ -100,11 +102,8 @@
 				FF580D811C088D1E00751A5D /* ReadRow.swift */,
 				FF580D821C088D1E00751A5D /* SqlType.swift */,
 				FF580D831C088D1E00751A5D /* SqlValue.swift */,
-				FF94F2D91BDE2634009AD0C9 /* Info.plist */,
-				FF580D421C088AC900751A5D /* Config.xcconfig */,
-				FF580D431C088B7400751A5D /* libsqlite3.tbd */,
 			);
-			path = Sqlable;
+			path = Sources;
 			sourceTree = "<group>";
 		};
 		FF94F2E21BDE2634009AD0C9 /* SqlableTests */ = {
@@ -114,6 +113,25 @@
 				FF94F2E51BDE2634009AD0C9 /* Info.plist */,
 			);
 			path = SqlableTests;
+			sourceTree = "<group>";
+		};
+		FFCD6A9A1C1A1B6A0021ED87 /* Supporting files */ = {
+			isa = PBXGroup;
+			children = (
+				FF580D421C088AC900751A5D /* Config.xcconfig */,
+				FF94F2D91BDE2634009AD0C9 /* Info.plist */,
+				FF580D901C08915600751A5D /* sqlite3.h */,
+				FF94F2D71BDE2634009AD0C9 /* Sqlable.h */,
+			);
+			path = "Supporting files";
+			sourceTree = "<group>";
+		};
+		FFCD6A9B1C1A1B790021ED87 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FF580D431C088B7400751A5D /* libsqlite3.tbd */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -352,7 +370,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = Sqlable/Info.plist;
+				INFOPLIST_FILE = "Supporting files/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -372,7 +390,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = Sqlable/Info.plist;
+				INFOPLIST_FILE = "Supporting files/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";

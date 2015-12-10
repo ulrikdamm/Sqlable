@@ -6,8 +6,6 @@
 //  Copyright © 2015 Robocat. All rights reserved.
 //
 
-import Foundation
-
 public protocol SqlValue {
 	func bind(db : COpaquePointer, handle : COpaquePointer, index : Int32) throws
 }

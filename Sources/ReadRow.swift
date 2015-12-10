@@ -6,8 +6,6 @@
 //  Copyright © 2015 Robocat. All rights reserved.
 //
 
-import Foundation
-
 public struct ReadRow<T : Sqlable> {
 	private let handle : COpaquePointer
 	let type = T.self
