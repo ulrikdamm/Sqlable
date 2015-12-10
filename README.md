@@ -22,9 +22,9 @@ And you want to persist this in a database. To do this, you just make your struc
 
 ```swift
 extension Bicycle : Sqlable {
-	static let id = Column(“id”, .Integer, PrimaryKey(autoincrement: true))
-	static let name = Column(“name”, .Text)
-	static let color = Column(“color”, .Text)
+	static let id = Column("id", .Integer, PrimaryKey(autoincrement: true))
+	static let name = Column("name", .Text)
+	static let color = Column("color", .Text)
 	static let tableLayout = [id, name, color]
 	
 	func valueForColumn(column : Column) -> SqlValue? {
@@ -54,7 +54,7 @@ And when you’ve done that, you can start using your struct with SQLite!
 The first step to using it is to setup a new SQLite database and create the table for the bicycle:
 
 ```swift
-db = try SqliteDatabase(filepath: documentsPath() + “/db.sqlite”)
+db = try SqliteDatabase(filepath: documentsPath() + "/db.sqlite")
 try db.createTable(Bicycle.self)
 ```
 
@@ -62,20 +62,20 @@ And then you’re ready to write, read, update and delete bicycles from the data
 
 ```swift
 // Insert bicycle
-var bike = Bicycle(id: 1, name: “My bike”, color: “Black”)
+var bike = Bicycle(id: 1, name: "My bike", color: "Black")
 try bike.insert().run(db)
 
 // Read all bicycles
 let bicycles = try Bicycle.read().run(db)
 
 // Read some bicycles
-let redBikes = try Bicycle.read().filter(Bicycle.color == “red”).limit(3).run(db)
+let redBikes = try Bicycle.read().filter(Bicycle.color == "red").limit(3).run(db)
 
 // Count all bicycles
 let bicycleCount = try Bicycle.count().run(db)
 
 // Update a bicycle
-bike.name = “Sportsbike”
+bike.name = "Sportsbike"
 try bike.update().run(db)
 
 // Delete bike
@@ -100,7 +100,7 @@ try db.transaction { db in
 
 ```swift
 extension Bicycle : Sqlable {
-	static let ownerId = Column(“owner_id”, .Integer, ForeignKey<Person>())
+	static let ownerId = Column("owner_id", .Integer, ForeignKey<Person>())
 	...
 ```
 
@@ -108,14 +108,14 @@ And you can also specify other columns and delete/update rules:
 
 ```swift
 extension Bicycle : Sqlable {
-	static let ownerId = Column(“owner_id”, .Integer, ForeignKey<Person>(column: Person.regId, onDelete: .Cascade))
+	static let ownerId = Column("owner_id", .Integer, ForeignKey<Person>(column: Person.regId, onDelete: .Cascade))
 	...
 ```
 
 ## DSL for query filters
 
 ```swift
-Bicycle.read().filter(Bicycle.color == “red” && !(Bicycle.id == 0 || Bicycle.id > 1000))
+Bicycle.read().filter(Bicycle.color == "red" && !(Bicycle.id == 0 || Bicycle.id > 1000))
 ```
 
 ## Update callback
@@ -124,7 +124,7 @@ Register the `didUpdate` callback on your database handler to get notified when 
 
 ```swift
 db.didUpdate = {
-	print(“Reload everybody!”)
+	print("Reload everybody!")
 }
 ```
 
@@ -146,7 +146,7 @@ And it will be passed to your registered error handler:
 
 ```swift
 db.didFail = { error in
-	print(“Oh no! \(error)”)
+	print("Oh no! \(error)")
 }
 ```
 
@@ -155,7 +155,7 @@ db.didFail = { error in
 If you’re using Carthage (you should!), just add this to your Cartfile:
 
 ```
-github “ulrikdamm/Sqlable”
+github "ulrikdamm/Sqlable"
 ```
 
 And then just in your source files:
