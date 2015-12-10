@@ -45,8 +45,11 @@ extension Bicycle : Sqlable {
 ```
 
 These are the only three things you need to specify:
+
 • The table layout (which columns do you want stored)
+
 • How to save a column
+
 • How to read a row
 
 And when you’ve done that, you can start using your struct with SQLite!
@@ -169,9 +172,13 @@ And you’re good to go!
 # Which features are coming soon?
 
 • Nested transactions
+
 • Migrations
+
 • Joins
+
 • Table constraints
+
 • Update callbacks with change information
 
 # More technical details
