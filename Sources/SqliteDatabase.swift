@@ -9,8 +9,12 @@
 public enum SqlError : ErrorType {
 	case ParseError(String)
 	case ReadError(String)
-	case SqliteError(Int, String?)
-	case OpenError
+	
+	case SqliteIOError(Int)
+	case SqliteCorruptionError(Int)
+	case SqliteConstraintViolation(Int)
+	case SqliteDatatypeMismatch(Int)
+	case SqliteQueryError(Int)
 }
 
 public protocol SqlPrintable {
@@ -60,8 +64,9 @@ public class SqliteDatabase {
 	static func openDatabase(filepath : String) throws -> COpaquePointer {
 		var db : COpaquePointer = nil
 		
-		if sqlite3_open(filepath, &db) != SQLITE_OK {
-			throw SqlError.OpenError
+		let result = sqlite3_open(filepath, &db)
+		if result != SQLITE_OK {
+			throw sqlErrorForCode(Int(result))
 		}
 		
 		return db
@@ -78,9 +83,11 @@ public class SqliteDatabase {
 			switch error {
 			case .ParseError(let reason): message = "Parse error: " + reason
 			case .ReadError(let reason): message = "Read error: " + reason
-			case .OpenError: message = "Couldn't open database file"
-			case .SqliteError(let code, let reason?): message = "Sqlite error \(code): " + reason
-			case .SqliteError(let code, nil): message = "Sqlite error \(code)"
+			case .SqliteIOError(let code): message = "IO error (code \(code))"
+			case .SqliteCorruptionError(let code): message = "Corruption error (code \(code))"
+			case .SqliteConstraintViolation(let code): message = "Constraint violation (code \(code))"
+			case .SqliteDatatypeMismatch(let code): message = "Datatype mismatch (code \(code))"
+			case .SqliteQueryError(let code): message = "Invalid query (code \(code))"
 			}
 		} else {
 			message = (error as NSError).localizedDescription
@@ -208,6 +215,17 @@ func throwLastError(db : COpaquePointer) throws {
 	let errorCode = Int(sqlite3_errcode(db))
 	let reason = String.fromCString(sqlite3_errmsg(db))
 	
-	fatalError("SQL ERROR \(errorCode): \(reason ?? "Unknown error")")
-	throw SqlError.SqliteError(errorCode, reason)
+	print("SQL ERROR \(errorCode): \(reason ?? "Unknown error")")
+	
+	throw sqlErrorForCode(errorCode)
+}
+
+private func sqlErrorForCode(code : Int) -> SqlError {
+	switch Int32(code) {
+	case SQLITE_CONSTRAINT, SQLITE_TOOBIG: return SqlError.SqliteConstraintViolation(code)
+	case SQLITE_RANGE: return SqlError.SqliteQueryError(code)
+	case SQLITE_MISMATCH: return SqlError.SqliteDatatypeMismatch(code)
+	case SQLITE_CORRUPT, SQLITE_FORMAT, SQLITE_NOTADB: return SqlError.SqliteCorruptionError(code)
+	case _: return SqlError.SqliteIOError(code)
+	}
 }
