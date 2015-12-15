@@ -1,3 +1,4 @@
+
 //
 //  Sqlable.swift
 //  Simplyture
