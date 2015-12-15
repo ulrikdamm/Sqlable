@@ -6,9 +6,21 @@
 //  Copyright © 2015 Robocat. All rights reserved.
 //
 
+public protocol TableConstraint : SqlPrintable {}
+
+public struct Unique : TableConstraint {
+	public let columns : [Column]
+	
+	public var sqlDescription : String {
+		let columnList = columns.map { $0.name }.joinWithSeparator(", ")
+		return "constraint unique (\(columnList)) on conflict abort"
+	}
+}
+
 public protocol Sqlable {
 	static var tableName : String { get }
 	static var tableLayout : [Column] { get }
+	static var tableConstraints : [TableConstraint] { get }
 	
 	func valueForColumn(column : Column) -> SqlValue?
 	init(row : ReadRow<Self>) throws
@@ -22,9 +34,15 @@ public extension Sqlable {
 			.lowercaseString
 	}
 	
+	static var tableConstraints : [TableConstraint] {
+		return []
+	}
+	
 	static func createTable() -> String {
-		let columns = tableLayout.map { $0.sqlDescription }.joinWithSeparator(", ")
-		return "create table if not exists \(tableName) (\(columns))"
+		let columns = tableLayout.map { $0.sqlDescription }
+		let constraints = tableConstraints.map { $0.sqlDescription }
+		let fields = (columns + constraints).joinWithSeparator(", ")
+		return "create table if not exists \(tableName) (\(fields))"
 	}
 	
 	static func columnForName(name : String) -> Column? {
