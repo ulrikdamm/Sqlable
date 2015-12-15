@@ -21,7 +21,7 @@ public struct Unique : TableConstraint {
 	
 	public var sqlDescription : String {
 		let columnList = columns.map { $0.name }.joinWithSeparator(", ")
-		return "constraint unique (\(columnList)) on conflict abort"
+		return "unique (\(columnList)) on conflict abort"
 	}
 }
 
