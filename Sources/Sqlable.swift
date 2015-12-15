@@ -11,6 +11,14 @@ public protocol TableConstraint : SqlPrintable {}
 public struct Unique : TableConstraint {
 	public let columns : [Column]
 	
+	public init(columns : [Column]) {
+		self.columns = columns
+	}
+	
+	public init(columns : Column...) {
+		self.columns = columns
+	}
+	
 	public var sqlDescription : String {
 		let columnList = columns.map { $0.name }.joinWithSeparator(", ")
 		return "constraint unique (\(columnList)) on conflict abort"
