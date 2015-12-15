@@ -222,7 +222,7 @@ func throwLastError(db : COpaquePointer) throws {
 
 private func sqlErrorForCode(code : Int) -> SqlError {
 	switch Int32(code) {
-	case SQLITE_CONSTRAINT, SQLITE_TOOBIG: return SqlError.SqliteConstraintViolation(code)
+	case SQLITE_CONSTRAINT, SQLITE_TOOBIG, SQLITE_ABORT: return SqlError.SqliteConstraintViolation(code)
 	case SQLITE_ERROR, SQLITE_RANGE: return SqlError.SqliteQueryError(code)
 	case SQLITE_MISMATCH: return SqlError.SqliteDatatypeMismatch(code)
 	case SQLITE_CORRUPT, SQLITE_FORMAT, SQLITE_NOTADB: return SqlError.SqliteCorruptionError(code)
