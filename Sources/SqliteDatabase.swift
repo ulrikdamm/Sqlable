@@ -73,7 +73,9 @@ public class SqliteDatabase {
 	}
 	
 	deinit {
-		sqlite3_close(db)
+		if let db = db {
+			sqlite3_close(db)
+		}
 	}
 	
 	public func fail(error : ErrorType) {
@@ -137,7 +139,15 @@ public class SqliteDatabase {
 	
 	public func transaction<T>(block : SqliteDatabase throws -> T) throws -> T {
 		try beginTransaction()
-		let value = try block(self)
+		
+		let value : T
+		do {
+			value = try block(self)
+		} catch let error {
+			try rollbackTransaction()
+			throw error
+		}
+		
 		try commitTransaction()
 		return value
 	}
