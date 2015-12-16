@@ -124,8 +124,8 @@ If you want each bicycle in the database to have a unique name:
 ```swift
 extension Bicycle : Sqlable {
 	static let name = Column("name", .Text)
-  static let tableConstraints : [TableConstraint] = [Unique(Bicycle.name)]
-  ...
+	static let tableConstraints : [TableConstraint] = [Unique(Bicycle.name)]
+	...
 ```
 
 Or, if you want the combination of name and color to be unique:
@@ -133,9 +133,9 @@ Or, if you want the combination of name and color to be unique:
 ```swift
 extension Bicycle : Sqlable {
 	static let name = Column("name", .Text)
-  static let color = Column("color", .Text)
-  static let tableConstraints : [TableConstraint] = [Unique(Bicycle.name, Bicycle.color)]
-  ...
+	static let color = Column("color", .Text)
+	static let tableConstraints : [TableConstraint] = [Unique(Bicycle.name, Bicycle.color)]
+	...
 ```
 
 ### DSL for query filters
