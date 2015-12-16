@@ -12,8 +12,19 @@ public struct ReadRow<T : Sqlable> {
 	private let handle : COpaquePointer
 	let type = T.self
 	
+	let columnIndex : [String: Int]
+	
 	public init(handle : COpaquePointer) {
 		self.handle = handle
+		
+		var columnIndex : [String: Int] = [:]
+		
+		for i in (0..<sqlite3_column_count(handle)) {
+			let name = String.fromCString(sqlite3_column_name(handle, i))!
+			columnIndex[name] = Int(i)
+		}
+		
+		self.columnIndex = columnIndex
 	}
 	
 	public func get(column : Column) throws -> Int {
@@ -92,7 +103,10 @@ public struct ReadRow<T : Sqlable> {
 	}
 	
 	private func columnIndex(column : Column) throws -> Int32 {
-		guard let index = type.tableLayout.indexOf(column) else { throw SqlError.ReadError("Column \"\(column.name)\" not found on \(type)") }
+		guard let index = columnIndex[column.name] else {
+			throw SqlError.ReadError("Column \"\(column.name)\" not found on \(type)")
+		}
+		
 		return Int32(index)
 	}
 }
