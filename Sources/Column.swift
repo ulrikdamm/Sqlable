@@ -18,7 +18,13 @@ public struct PrimaryKey : ColumnOption {
 	}
 	
 	public var sqlDescription : String {
-		return "primary key" + (autoincrement ? " autoincrement" : "")
+		var sql = ["primary key"]
+		
+		if autoincrement {
+			sql.append("autoincrement")
+		}
+		
+		return sql.joinWithSeparator(" ")
 	}
 }
 
@@ -47,7 +53,17 @@ public struct ForeignKey<To : Sqlable> : ColumnOption, SqlPrintable {
 	}
 	
 	public var sqlDescription : String {
-		return "references \(To.tableName)(\(column.name)) on update \(onUpdate.sqlDescription) on delete \(onDelete.sqlDescription)"
+		var sql = ["references \(To.tableName)(\(column.name))"]
+		
+		if onUpdate != .Ignore {
+			sql.append("on update \(onUpdate.sqlDescription)")
+		}
+		
+		if onDelete != .Ignore {
+			sql.append("on delete \(onDelete.sqlDescription)")
+		}
+		
+		return sql.joinWithSeparator(" ")
 	}
 }
 
@@ -73,13 +89,12 @@ public func ~=(lhs : Column, rhs : Column) -> Bool {
 
 extension Column : SqlPrintable {
 	public var sqlDescription : String {
-		var statement = "\(name) \(type.sqlDescription)"
+		var statement = ["\(name) \(type.sqlDescription)"]
 		
-		if options.count > 0 {
-			let optionsString = options.map { $0.sqlDescription }.joinWithSeparator(" ")
-			statement += " \(optionsString)"
+		for option in options {
+			statement.append(option.sqlDescription)
 		}
 		
-		return statement
+		return statement.joinWithSeparator(" ")
 	}
 }
