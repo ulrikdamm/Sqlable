@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		FF2803961C22085F004BE4AA /* SqlableTransactionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2803951C22085F004BE4AA /* SqlableTransactionTests.swift */; };
+		FF2803991C221431004BE4AA /* Expression.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2803971C22141C004BE4AA /* Expression.swift */; };
 		FF580D441C088B7400751A5D /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = FF580D431C088B7400751A5D /* libsqlite3.tbd */; };
 		FF580D841C088D1E00751A5D /* SqliteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF580D7D1C088D1E00751A5D /* SqliteDatabase.swift */; };
 		FF580D851C088D1E00751A5D /* Sqlable.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF580D7E1C088D1E00751A5D /* Sqlable.swift */; };
@@ -35,6 +36,7 @@
 
 /* Begin PBXFileReference section */
 		FF2803951C22085F004BE4AA /* SqlableTransactionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SqlableTransactionTests.swift; sourceTree = "<group>"; };
+		FF2803971C22141C004BE4AA /* Expression.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Expression.swift; sourceTree = "<group>"; };
 		FF580D421C088AC900751A5D /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		FF580D431C088B7400751A5D /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		FF580D7D1C088D1E00751A5D /* SqliteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SqliteDatabase.swift; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 				FF580D7D1C088D1E00751A5D /* SqliteDatabase.swift */,
 				FF580D7E1C088D1E00751A5D /* Sqlable.swift */,
 				FF580D7F1C088D1E00751A5D /* Column.swift */,
+				FF2803971C22141C004BE4AA /* Expression.swift */,
 				FF580D801C088D1E00751A5D /* Statement.swift */,
 				FF580D811C088D1E00751A5D /* ReadRow.swift */,
 				FF580D821C088D1E00751A5D /* SqlType.swift */,
@@ -252,6 +255,7 @@
 				FF580D851C088D1E00751A5D /* Sqlable.swift in Sources */,
 				FF580D881C088D1E00751A5D /* ReadRow.swift in Sources */,
 				FF580D891C088D1E00751A5D /* SqlType.swift in Sources */,
+				FF2803991C221431004BE4AA /* Expression.swift in Sources */,
 				FF580D841C088D1E00751A5D /* SqliteDatabase.swift in Sources */,
 				FF580D861C088D1E00751A5D /* Column.swift in Sources */,
 				FF580D8A1C088D1E00751A5D /* SqlValue.swift in Sources */,
