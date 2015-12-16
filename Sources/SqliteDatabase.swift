@@ -31,8 +31,8 @@ public class SqliteDatabase {
 	
 	static let errorDomain = "dk.ufd.Sqlable"
 	
-	var inTransaction = false
-	var updated = false
+	var transactionLevel = 0
+	var updated : [Bool] = []
 	
 	public  var didUpdate : (Void -> Void)?
 	public  var didFail : (String -> Void)?
@@ -99,8 +99,9 @@ public class SqliteDatabase {
 	}
 	
 	func update() {
-		if inTransaction {
-			updated = true
+		if transactionLevel > 0 {
+			updated.popLast()
+			updated.append(true)
 		} else {
 			didUpdate?()
 		}
@@ -109,42 +110,50 @@ public class SqliteDatabase {
 	public func execute(statement : String) throws {
 		let sql = statement.cStringUsingEncoding(NSUTF8StringEncoding)!
 		
-		if debug { print("\(inTransaction ? "  " : "")SQL: \(statement)") }
+		if debug {
+			let indentation = (0..<transactionLevel).map { _ in "  " }.joinWithSeparator("")
+			print("\(indentation)SQL: \(statement)")
+		}
 		
 		if sqlite3_exec(db, sql, nil, nil, nil) != SQLITE_OK {
 			try throwLastError(db)
 		}
 	}
 	
-	public func beginTransaction() throws {
-		try execute("begin transaction")
-		inTransaction = true
+	public func beginTransaction() throws -> Int {
+		try execute("savepoint level_\(transactionLevel + 1)")
+		transactionLevel += 1
+		return transactionLevel
 	}
 	
 	public func commitTransaction() throws {
-		try execute("commit transaction")
-		inTransaction = false
+		try execute("release level_\(transactionLevel)")
+		transactionLevel -= 1
 		
-		if updated {
-			updated = false
+		if updated.popLast() == true && transactionLevel == 0 {
 			update()
 		}
 	}
 	
-	public func rollbackTransaction() throws {
-		try execute("rollback transaction")
-		inTransaction = false
-		updated = false
+	public func rollbackTransaction(level : Int) throws {
+		guard level <= transactionLevel else { return }
+		
+		try execute("rollback to level_\(level)")
+		transactionLevel = level - 1
+		
+		while updated.count > level {
+			updated.popLast()
+		}
 	}
 	
 	public func transaction<T>(block : SqliteDatabase throws -> T) throws -> T {
-		try beginTransaction()
+		let level = try beginTransaction()
 		
 		let value : T
 		do {
 			value = try block(self)
 		} catch let error {
-			try rollbackTransaction()
+			try rollbackTransaction(level)
 			throw error
 		}
 		
@@ -160,7 +169,10 @@ public class SqliteDatabase {
 	func run<T : Sqlable, Return>(statement : Statement<T, Return>) throws -> Any {
 		guard let sql = statement.sqlDescription.cStringUsingEncoding(NSUTF8StringEncoding) else { fatalError("Invalid SQL") }
 		
-		if debug { print("\(inTransaction ? "  " : "")SQL: \(statement.sqlDescription) \(statement.values)") }
+		if debug {
+			let indentation = (0..<transactionLevel).map { _ in "  " }.joinWithSeparator("")
+			print("\(indentation)SQL: \(statement.sqlDescription) \(statement.values)")
+		}
 		
 		var handle : COpaquePointer = nil
 		if sqlite3_prepare_v2(db, sql, -1, &handle, nil) != SQLITE_OK {
@@ -190,7 +202,9 @@ public class SqliteDatabase {
 			if sqlite3_step(handle) != SQLITE_ROW { try throwLastError(db) }
 			returnValue = Int(sqlite3_column_int64(handle, Int32(0)))
 			
-			if debug { print("\(inTransaction ? "  " : "")SQL result: \(returnValue)") }
+			if debug {
+				let indentation = (0..<transactionLevel).map { _ in "  " }.joinWithSeparator("")
+				print("\(indentation)SQL result: \(returnValue)") }
 		case .Select:
 			var rows : [T] = []
 			
@@ -204,7 +218,9 @@ public class SqliteDatabase {
 				returnValue = rows
 			}
 			
-			if debug { print("\(inTransaction ? "  " : "")SQL result: \(returnValue)") }
+			if debug {
+				let indentation = (0..<transactionLevel).map { _ in "  " }.joinWithSeparator("")
+				print("\(indentation)SQL result: \(returnValue)") }
 		}
 		
 		if sqlite3_finalize(handle) != SQLITE_OK {

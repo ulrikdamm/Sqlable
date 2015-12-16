@@ -16,6 +16,7 @@ class SqliteTransactionTests: XCTestCase {
 	override func setUp() {
 		_ = try? NSFileManager.defaultManager().removeItemAtPath(path)
 		db = try! SqliteDatabase(filepath: path)
+		db.debug = true
 		
 		try! db.createTable(Table.self)
 	}
@@ -40,10 +41,10 @@ class SqliteTransactionTests: XCTestCase {
 	}
 	
 	func testTransactionRollback() {
-		try! db.beginTransaction()
+		let transaction = try! db.beginTransaction()
 		try! Table(id: nil, value1: 1, value2: 1).insert().run(db)
 		try! Table(id: nil, value1: 1, value2: 2).insert().run(db)
-		try! db.rollbackTransaction()
+		try! db.rollbackTransaction(transaction)
 		
 		XCTAssert(try! Table.count().run(db) == 0)
 	}
@@ -64,5 +65,100 @@ class SqliteTransactionTests: XCTestCase {
 		
 		XCTAssert(constraintViolation)
 		XCTAssert(try! Table.count().run(db) == 0)
+	}
+	
+	func testNestedTransaction() {
+		try! db.transaction { db in
+			try db.transaction { db in
+				try Table(id: nil, value1: 1, value2: 1).insert().run(db)
+				try Table(id: nil, value1: 1, value2: 2).insert().run(db)
+			}
+		}
+		
+		XCTAssert(try! Table.count().run(db) == 2)
+	}
+	
+	func testManyNestedTransaction() {
+		try! db.transaction { db in
+			try db.transaction { db in
+				try db.transaction { db in
+					try db.transaction { db in
+						try db.transaction { db in
+							try db.transaction { db in
+								try db.transaction { db in
+									try db.transaction { db in
+										try db.transaction { db in
+											try Table(id: nil, value1: 1, value2: 1).insert().run(db)
+											try Table(id: nil, value1: 1, value2: 2).insert().run(db)
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		XCTAssert(try! Table.count().run(db) == 2)
+	}
+	
+	func testNestedTransactionRollback() {
+		try! db.transaction { db in
+			let transaction = try! db.beginTransaction()
+			try! Table(id: nil, value1: 1, value2: 1).insert().run(db)
+			try! Table(id: nil, value1: 1, value2: 2).insert().run(db)
+			try! db.rollbackTransaction(transaction)
+			
+			try! Table(id: nil, value1: 1, value2: 3).insert().run(db)
+			try! Table(id: nil, value1: 1, value2: 4).insert().run(db)
+		}
+		
+		XCTAssert(try! Table.count().run(db) == 2)
+		XCTAssert(try! Table.count().filter(Table.value2 > 2).run(db) == 2)
+	}
+	
+	func testMultipleLevelRollback() {
+		try! db.beginTransaction()
+		try! Table(id: nil, value1: 1, value2: 1).insert().run(db)
+		try! Table(id: nil, value1: 1, value2: 2).insert().run(db)
+		
+		let transaction2 = try! db.beginTransaction()
+		try! Table(id: nil, value1: 1, value2: 3).insert().run(db)
+		try! Table(id: nil, value1: 1, value2: 4).insert().run(db)
+		
+		try! db.beginTransaction()
+		try! Table(id: nil, value1: 1, value2: 5).insert().run(db)
+		try! Table(id: nil, value1: 1, value2: 6).insert().run(db)
+		
+		try! db.rollbackTransaction(transaction2)
+		
+		XCTAssert(try! Table.count().run(db) == 2)
+	}
+	
+	func testInnerTransactionErrorHandling() {
+		try! db.transaction { db in
+			do {
+				try db.transaction { db in
+					try Table(id: nil, value1: 1, value2: 2).insert().run(db)
+					
+					try db.transaction { db in
+						try Table(id: nil, value1: 1, value2: 1).insert().run(db)
+						try Table(id: nil, value1: 1, value2: 1).insert().run(db)
+					}
+					
+					try Table(id: nil, value1: 1, value2: 3).insert().run(db)
+				}
+			} catch SqlError.SqliteConstraintViolation(_) {
+				
+			} catch let error {
+				throw error
+			}
+			
+			try! Table(id: nil, value1: 1, value2: 4).insert().run(db)
+		}
+		
+		XCTAssert(try! Table.count().run(db) == 1)
+		XCTAssert(try! Table.count().filter(Table.value2 == 4).run(db) == 1)
 	}
 }
