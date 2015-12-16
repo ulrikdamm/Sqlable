@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FF2803961C22085F004BE4AA /* SqlableTransactionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2803951C22085F004BE4AA /* SqlableTransactionTests.swift */; };
 		FF580D441C088B7400751A5D /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = FF580D431C088B7400751A5D /* libsqlite3.tbd */; };
 		FF580D841C088D1E00751A5D /* SqliteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF580D7D1C088D1E00751A5D /* SqliteDatabase.swift */; };
 		FF580D851C088D1E00751A5D /* Sqlable.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF580D7E1C088D1E00751A5D /* Sqlable.swift */; };
@@ -33,6 +34,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FF2803951C22085F004BE4AA /* SqlableTransactionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SqlableTransactionTests.swift; sourceTree = "<group>"; };
 		FF580D421C088AC900751A5D /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		FF580D431C088B7400751A5D /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		FF580D7D1C088D1E00751A5D /* SqliteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SqliteDatabase.swift; sourceTree = "<group>"; };
@@ -113,6 +115,7 @@
 			children = (
 				FF94F2E31BDE2634009AD0C9 /* SqlableTests.swift */,
 				FFD9DEB61C20718800CC4709 /* SqlableConstraintTests.swift */,
+				FF2803951C22085F004BE4AA /* SqlableTransactionTests.swift */,
 				FF94F2E51BDE2634009AD0C9 /* Info.plist */,
 			);
 			path = SqlableTests;
@@ -261,6 +264,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FF94F2E41BDE2634009AD0C9 /* SqlableTests.swift in Sources */,
+				FF2803961C22085F004BE4AA /* SqlableTransactionTests.swift in Sources */,
 				FFD9DEB71C20718800CC4709 /* SqlableConstraintTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
