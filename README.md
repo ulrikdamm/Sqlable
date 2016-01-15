@@ -97,8 +97,6 @@ try db.transaction { db in
 }
 ```
 
-(*Nested transactions are coming soon*)
-
 ### Foreign key constraints
 
 ```swift
@@ -194,13 +192,9 @@ And you’re good to go!
 
 ## Which features are coming soon?
 
-• Nested transactions
-
 • Migrations
 
 • Joins
-
-• Table constraints
 
 • Update callbacks with change information
 
