@@ -71,11 +71,34 @@ public struct Column : Equatable {
 	public let name : String
 	public let type : SqlType
 	public let options : [ColumnOption]
+	let modifiers : [String]
 	
 	public init(_ name : String, _ type : SqlType, _ options : ColumnOption...) {
 		self.name = name
 		self.type = type
 		self.options = options
+		self.modifiers = []
+	}
+	
+	init(_ name : String, _ type : SqlType, _ options : [ColumnOption], modifiers : [String]) {
+		self.name = name
+		self.type = type
+		self.options = options
+		self.modifiers = modifiers
+	}
+}
+
+extension Column {
+	public func uppercase() -> Column {
+		return Column(name, type, options, modifiers: modifiers + ["upper"])
+	}
+	
+	public func lowercase() -> Column {
+		return Column(name, type, options, modifiers: modifiers + ["lower"])
+	}
+	
+	var expressionName : String {
+		return modifiers.reduce(name) { name, modifier in "\(modifier)(\(name))" }
 	}
 }
 

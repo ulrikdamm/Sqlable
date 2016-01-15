@@ -8,6 +8,34 @@
 
 import Foundation
 
+public enum ColumnOrValue : SqlPrintable {
+	case TableColumn(Column)
+	case Value(SqlValue)
+	
+	var value : SqlValue? {
+		if case .Value(let value) = self {
+			return value
+		} else {
+			return nil
+		}
+	}
+	
+	var column : Column? {
+		if case .TableColumn(let column) = self {
+			return column
+		} else {
+			return nil
+		}
+	}
+	
+	public var sqlDescription : String {
+		switch self {
+		case .TableColumn(let column): return column.expressionName
+		case .Value(_): return "?"
+		}
+	}
+}
+
 public indirect enum Expression : SqlPrintable {
 	case And(Expression, Expression)
 	case Or(Expression, Expression)
@@ -18,21 +46,25 @@ public indirect enum Expression : SqlPrintable {
 	case GreaterThan(Column, SqlValue)
 	case GreaterThanOrEqual(Column, SqlValue)
 	case In(Column, [SqlValue])
+	case Function(name : String, operands : [ColumnOrValue])
 	
 	public var sqlDescription : String {
 		switch self {
 		case .And(let lhs, let rhs): return "(\(lhs.sqlDescription)) and (\(rhs.sqlDescription))"
 		case .Or(let lhs, let rhs): return "(\(lhs.sqlDescription)) or (\(rhs.sqlDescription))"
 		case .Inverse(let expr): return "not (\(expr.sqlDescription))"
-		case .LessThan(let lhs, _): return "(\(lhs.name)) < ?"
-		case .LessThanOrEqual(let lhs, _): return "(\(lhs.name)) <= ?"
-		case .GreaterThan(let lhs, _): return "(\(lhs.name)) > ?"
-		case .GreaterThanOrEqual(let lhs, _): return "(\(lhs.name)) >= ?"
-		case .EqualsValue(let column, is Null): return "\(column.name) is null"
-		case .EqualsValue(let column, _): return "\(column.name) == ?"
+		case .LessThan(let lhs, _): return "(\(lhs.expressionName)) < ?"
+		case .LessThanOrEqual(let lhs, _): return "(\(lhs.expressionName)) <= ?"
+		case .GreaterThan(let lhs, _): return "(\(lhs.expressionName)) > ?"
+		case .GreaterThanOrEqual(let lhs, _): return "(\(lhs.expressionName)) >= ?"
+		case .EqualsValue(let column, is Null): return "\(column.expressionName) is null"
+		case .EqualsValue(let column, _): return "\(column.expressionName) == ?"
 		case .In(let column, let values):
 			let placeholders = values.map { _ in "?" }.joinWithSeparator(", ")
-			return "\(column.name) in (\(placeholders))"
+			return "\(column.expressionName) in (\(placeholders))"
+		case .Function(let name, let operands):
+			let placeholders = operands.map { $0.sqlDescription }.joinWithSeparator(", ")
+			return "\(name)(\(placeholders))"
 		}
 	}
 	
@@ -48,7 +80,18 @@ public indirect enum Expression : SqlPrintable {
 		case .GreaterThan(_, let rhs): return [rhs]
 		case .GreaterThanOrEqual(_, let rhs): return [rhs]
 		case .In(_, let rhs): return rhs
+		case .Function(_, let operands): return operands.flatMap { $0.value }
 		}
+	}
+}
+
+extension Column {
+	public func contains(values : [SqlValue]) -> Expression {
+		return .In(self, values)
+	}
+	
+	public func like(string : String) -> Expression {
+		return .Function(name: "like", operands: [.Value(string), .TableColumn(self)])
 	}
 }
 

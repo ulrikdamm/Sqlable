@@ -19,7 +19,7 @@ extension Table : Sqlable {
 	static let id = Column("id", .Integer, PrimaryKey(autoincrement: true))
 	static let value1 = Column("value_1", .Integer)
 	static let value2 = Column("value_2", .Integer)
-	static let tableLayout = [value1, value2]
+	static let tableLayout = [id, value1, value2]
 	
 	static let tableConstraints : [TableConstraint] = [Unique(value1, value2)]
 	
