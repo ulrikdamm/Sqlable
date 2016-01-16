@@ -147,8 +147,28 @@ Bicycle.read().filter(Bicycle.color == "red" && !(Bicycle.id == 0 || Bicycle.id 
 Register the `didUpdate` callback on your database handler to get notified when anything changes:
 
 ```swift
-db.didUpdate = {
-	print("Reload everybody!")
+db.didUpdate = { table, id, change in
+	switch change {
+	case .Insert: print("Inserted \(id) into \(table)")
+	case .Update: print("Updated \(id) in \(table)")
+	caes .Delete: print("Deleted \(id) from \(table)")
+	}
+}
+```
+
+But even better, you can register event callbacks on specific actions, tables and ids:
+
+```swift
+db.on(.Insert, to: Bicycle.self) { id in
+	print("Inserted bicykle \(id)")
+}
+
+db.on(.Update, to: Bicycle.self, id: 2) { id in
+	print("Bicykle 2 has been updated")
+}
+
+db.on(.Delete, to: Bicycle.self) { id in
+	print("Bicykle \(id) has been deleted")
 }
 ```
 
@@ -195,8 +215,6 @@ And you’re good to go!
 • Migrations
 
 • Joins
-
-• Update callbacks with change information
 
 ## More technical details
 
