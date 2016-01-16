@@ -20,6 +20,90 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		try! db.createTable(TestTable.self)
 	}
 	
+	func testTransaction() {
+		var inTransaction = false
+		var updateCalls = 0
+		
+		db.didUpdate = { table, row, change in
+			XCTAssert(inTransaction == false)
+			updateCalls++
+		}
+		
+		try! db.transaction { db in
+			inTransaction = true
+			try TestTable(id: 1, value1: 0, value2: "").insert().run(db)
+			try TestTable(id: 2, value1: 0, value2: "").insert().run(db)
+			try TestTable(id: 2, value1: 0, value2: "hi!").update().run(db)
+			inTransaction = false
+		}
+		
+		XCTAssert(updateCalls == 3)
+	}
+	
+	func testTransactionRollback() {
+		var inTransaction = false
+		var updateCalls = 0
+		
+		db.didUpdate = { table, row, change in
+			XCTAssert(inTransaction == false)
+			updateCalls++
+		}
+		
+		try! db.beginTransaction()
+		inTransaction = true
+		try! TestTable(id: 1, value1: 0, value2: "").insert().run(db)
+		try! TestTable(id: 2, value1: 0, value2: "").insert().run(db)
+		try! TestTable(id: 2, value1: 0, value2: "hi!").update().run(db)
+		inTransaction = false
+		try! db.rollbackTransaction()
+		
+		XCTAssert(updateCalls == 0)
+	}
+	
+	func testNestedTransactions() {
+		var inTransaction = false
+		var updateCalls = 0
+		
+		db.didUpdate = { table, row, change in
+			XCTAssert(inTransaction == false)
+			updateCalls++
+		}
+		
+		try! db.transaction { db in
+			inTransaction = true
+			try TestTable(id: 1, value1: 0, value2: "").insert().run(db)
+			try db.transaction { db in
+				try TestTable(id: 2, value1: 0, value2: "").insert().run(db)
+			}
+			try TestTable(id: 2, value1: 0, value2: "hi!").update().run(db)
+			inTransaction = false
+		}
+		
+		XCTAssert(updateCalls == 3)
+	}
+	
+	func testNestedTransactionRollback() {
+		var inTransaction = false
+		var updateCalls = 0
+		
+		db.didUpdate = { table, row, change in
+			XCTAssert(inTransaction == false)
+			updateCalls++
+		}
+		
+		try! db.transaction { db in
+			inTransaction = true
+			try TestTable(id: 1, value1: 0, value2: "").insert().run(db)
+			try db.beginTransaction()
+			try TestTable(id: 2, value1: 0, value2: "").insert().run(db)
+			try db.rollbackTransaction()
+			try TestTable(id: 1, value1: 0, value2: "hi!").update().run(db)
+			inTransaction = false
+		}
+		
+		XCTAssert(updateCalls == 2)
+	}
+	
 	func testDidUpdateInsert() {
 		var didCall = false
 		

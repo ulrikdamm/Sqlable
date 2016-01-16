@@ -42,6 +42,8 @@ public class SqliteDatabase {
 	
 	var eventHandlers : [(change : Change, tableName : String, id : Int?, callback : Int -> Void)] = []
 	
+	var pendingUpdates : [[(change : Change, tableName : String, id : Int)]] = []
+	
 	public init(filepath : String) throws {
 		do {
 			db = try SqliteDatabase.openDatabase(filepath)
@@ -105,6 +107,20 @@ public class SqliteDatabase {
 		}
 	}
 	
+	func notifyAboutUpdate(update : (change : Change, tableName : String, id : Int)) {
+		didUpdate?(table: update.tableName, id: update.id, change: update.change)
+		
+		for eventHandler in eventHandlers {
+			if (update.change == eventHandler.change && update.tableName == eventHandler.tableName) {
+				if let id = eventHandler.id where id != update.id {
+					break
+				}
+				
+				eventHandler.callback(update.id)
+			}
+		}
+	}
+	
 	public func execute(statement : String) throws {
 		let sql = statement.cStringUsingEncoding(NSUTF8StringEncoding)!
 		
@@ -120,26 +136,39 @@ public class SqliteDatabase {
 	
 	public func beginTransaction() throws -> Int {
 		try execute("savepoint level_\(transactionLevel + 1)")
+		pendingUpdates.append([])
 		transactionLevel += 1
 		return transactionLevel
 	}
 	
 	public func commitTransaction() throws {
 		try execute("release level_\(transactionLevel)")
+		
 		transactionLevel -= 1
+		
+		if transactionLevel == 0 {
+			for update in pendingUpdates.popLast()! {
+				notifyAboutUpdate(update)
+			}
+		} else {
+			pendingUpdates[pendingUpdates.count - 2] += pendingUpdates.popLast()!
+		}
 		
 		if updated.popLast() == true && transactionLevel == 0 {
 			update()
 		}
 	}
 	
-	public func rollbackTransaction(level : Int) throws {
-		guard level <= transactionLevel else { return }
+	public func rollbackTransaction(level : Int? = nil) throws {
+		let finalLevel = level ?? transactionLevel
 		
-		try execute("rollback to level_\(level)")
-		transactionLevel = level - 1
+		guard finalLevel <= transactionLevel else { return }
 		
-		while updated.count > level {
+		try execute("rollback to level_\(finalLevel)")
+		transactionLevel = finalLevel - 1
+		pendingUpdates.popLast()
+		
+		while updated.count > finalLevel {
 			updated.popLast()
 		}
 	}
@@ -255,6 +284,8 @@ private func sqlErrorForCode(code : Int) -> SqlError {
 }
 
 private func onUpdate(thisPointer : UnsafeMutablePointer<Void>, changeRaw : Int32, database : UnsafePointer<Int8>, tableNameRaw : UnsafePointer<Int8>, rowid : sqlite3_int64) {
+	let this = unsafeBitCast(thisPointer, SqliteDatabase.self)
+	
 	let change : SqliteDatabase.Change
 	
 	switch changeRaw {
@@ -265,16 +296,12 @@ private func onUpdate(thisPointer : UnsafeMutablePointer<Void>, changeRaw : Int3
 	}
 	
 	let tableName = String.fromCString(UnsafePointer<Int8>(tableNameRaw))!
-	let this = unsafeBitCast(thisPointer, SqliteDatabase.self)
-	this.didUpdate?(table: tableName, id: Int(rowid), change: change)
 	
-	for eventHandler in this.eventHandlers {
-		if (change == eventHandler.change && tableName == eventHandler.tableName) {
-			if let id = eventHandler.id where id != Int(rowid) {
-				break
-			}
-			
-			eventHandler.callback(Int(rowid))
-		}
+	let update = (change, tableName, Int(rowid))
+	
+	if this.transactionLevel > 0 {
+		this.pendingUpdates[this.pendingUpdates.count - 1].append(update)
+	} else {
+		this.notifyAboutUpdate(update)
 	}
 }
