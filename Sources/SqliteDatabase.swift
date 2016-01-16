@@ -20,7 +20,6 @@ public enum SqlError : ErrorType {
 public protocol SqlPrintable {
 	var sqlDescription : String { get }
 }
-
 public class SqliteDatabase {
 	let db : COpaquePointer!
 	
@@ -34,8 +33,14 @@ public class SqliteDatabase {
 	var transactionLevel = 0
 	var updated : [Bool] = []
 	
-	public  var didUpdate : (Void -> Void)?
-	public  var didFail : (String -> Void)?
+	public enum Change {
+		case Insert, Update, Delete
+	}
+	
+	public var didUpdate : ((table : String, id : Int, change : Change) -> Void)?
+	public var didFail : (String -> Void)?
+	
+	var eventHandlers : [(change : Change, tableName : String, id : Int?, callback : Int -> Void)] = []
 	
 	public init(filepath : String) throws {
 		do {
@@ -47,18 +52,11 @@ public class SqliteDatabase {
 		
 		try execute("pragma foreign_keys = on")
 		
-//		sqlite3_update_hook(db, { _, change, _, tableName, rowid in
-//			let c : String
-//			
-//			switch change {
-//			case SQLITE_INSERT: c = "insert"
-//			case SQLITE_UPDATE: c = "update"
-//			case SQLITE_DELETE: c = "delete"
-//			case _: c = "?"
-//			}
-//			
-//			print("Change: \(c) \(String.fromCString(UnsafePointer<Int8>(tableName))!) \(rowid)")
-//			}, nil)
+		sqlite3_update_hook(db, onUpdate, unsafeBitCast(self, UnsafeMutablePointer<Void>.self))
+	}
+	
+	public func on<T : Sqlable>(change : Change, to : T.Type, id : Int? = nil, doThis : (id : Int) -> Void) {
+		eventHandlers.append((change, to.tableName, id, doThis))
 	}
 	
 	static func openDatabase(filepath : String) throws -> COpaquePointer {
@@ -103,7 +101,7 @@ public class SqliteDatabase {
 			updated.popLast()
 			updated.append(true)
 		} else {
-			didUpdate?()
+//			didUpdate?()
 		}
 	}
 	
@@ -253,5 +251,30 @@ private func sqlErrorForCode(code : Int) -> SqlError {
 	case SQLITE_MISMATCH: return SqlError.SqliteDatatypeMismatch(code)
 	case SQLITE_CORRUPT, SQLITE_FORMAT, SQLITE_NOTADB: return SqlError.SqliteCorruptionError(code)
 	case _: return SqlError.SqliteIOError(code)
+	}
+}
+
+private func onUpdate(thisPointer : UnsafeMutablePointer<Void>, changeRaw : Int32, database : UnsafePointer<Int8>, tableNameRaw : UnsafePointer<Int8>, rowid : sqlite3_int64) {
+	let change : SqliteDatabase.Change
+	
+	switch changeRaw {
+	case SQLITE_INSERT: change = .Insert
+	case SQLITE_UPDATE: change = .Update
+	case SQLITE_DELETE: change = .Delete
+	case _: return
+	}
+	
+	let tableName = String.fromCString(UnsafePointer<Int8>(tableNameRaw))!
+	let this = unsafeBitCast(thisPointer, SqliteDatabase.self)
+	this.didUpdate?(table: tableName, id: Int(rowid), change: change)
+	
+	for eventHandler in this.eventHandlers {
+		if (change == eventHandler.change && tableName == eventHandler.tableName) {
+			if let id = eventHandler.id where id != Int(rowid) {
+				break
+			}
+			
+			eventHandler.callback(Int(rowid))
+		}
 	}
 }

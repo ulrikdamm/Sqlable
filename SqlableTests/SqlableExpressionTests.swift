@@ -21,8 +21,6 @@ extension TestTable : Sqlable {
 	static let value2 = Column("value_2", .Text)
 	static let tableLayout = [id, value1, value2]
 	
-	static let tableConstraints : [TableConstraint] = [Unique(value1, value2)]
-	
 	func valueForColumn(column : Column) -> SqlValue? {
 		switch column {
 		case TestTable.id: return id
