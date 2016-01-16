@@ -31,7 +31,6 @@ public class SqliteDatabase {
 	static let errorDomain = "dk.ufd.Sqlable"
 	
 	var transactionLevel = 0
-	var updated : [Bool] = []
 	
 	public enum Change {
 		case Insert, Update, Delete
@@ -98,15 +97,6 @@ public class SqliteDatabase {
 		didFail?(message)
 	}
 	
-	func update() {
-		if transactionLevel > 0 {
-			updated.popLast()
-			updated.append(true)
-		} else {
-//			didUpdate?()
-		}
-	}
-	
 	func notifyAboutUpdate(update : (change : Change, tableName : String, id : Int)) {
 		didUpdate?(table: update.tableName, id: update.id, change: update.change)
 		
@@ -153,10 +143,6 @@ public class SqliteDatabase {
 		} else {
 			pendingUpdates[pendingUpdates.count - 2] += pendingUpdates.popLast()!
 		}
-		
-		if updated.popLast() == true && transactionLevel == 0 {
-			update()
-		}
 	}
 	
 	public func rollbackTransaction(level : Int? = nil) throws {
@@ -167,10 +153,6 @@ public class SqliteDatabase {
 		try execute("rollback to level_\(finalLevel)")
 		transactionLevel = finalLevel - 1
 		pendingUpdates.popLast()
-		
-		while updated.count > finalLevel {
-			updated.popLast()
-		}
 	}
 	
 	public func transaction<T>(block : SqliteDatabase throws -> T) throws -> T {
@@ -190,7 +172,6 @@ public class SqliteDatabase {
 	
 	public func createTable<T : Sqlable>(_ : T.Type) throws {
 		try execute(T.createTable())
-		update()
 	}
 	
 	func run<T : Sqlable, Return>(statement : Statement<T, Return>) throws -> Any {
@@ -217,14 +198,12 @@ public class SqliteDatabase {
 			}
 			
 			returnValue = Void()
-			update()
 		case .Insert:
 			if sqlite3_step(handle) != SQLITE_DONE {
 				try throwLastError(db)
 			}
 			
 			returnValue = Int(sqlite3_last_insert_rowid(db))
-			update()
 		case .Count:
 			if sqlite3_step(handle) != SQLITE_ROW { try throwLastError(db) }
 			returnValue = Int(sqlite3_column_int64(handle, Int32(0)))
