@@ -144,6 +144,8 @@ Bicycle.read().filter(Bicycle.color == "red" && !(Bicycle.id == 0 || Bicycle.id 
 
 ### Update callback
 
+(*New in 1.2!*)
+
 Register the `didUpdate` callback on your database handler to get notified when anything changes:
 
 ```swift
@@ -247,6 +249,12 @@ Inverse: `!expression`
 Is null: `!column`
 
 Contains: `column ∈ [value]` or `contains(column, value)`
+
+String lowercase: `column.lowercase()`
+
+String uppercase: `column.uppercase()`
+
+In-string search: `column.like(value)` (e.g. Bicycle.name.like("%bike%"))
 
 `column` means an instance of a Column struct, e.g. `Bicycle.id`.
 
