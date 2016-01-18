@@ -39,7 +39,7 @@ public class SqliteDatabase {
 	public var didUpdate : ((table : String, id : Int, change : Change) -> Void)?
 	public var didFail : (String -> Void)?
 	
-	var eventHandlers : [(change : Change, tableName : String, id : Int?, callback : Int -> Void)] = []
+	var eventHandlers : [(change : Change, tableName : String, id : Int?, callback : Int throws -> Void)] = []
 	
 	var pendingUpdates : [[(change : Change, tableName : String, id : Int)]] = []
 	
@@ -56,7 +56,7 @@ public class SqliteDatabase {
 		sqlite3_update_hook(db, onUpdate, unsafeBitCast(self, UnsafeMutablePointer<Void>.self))
 	}
 	
-	public func on<T : Sqlable>(change : Change, to : T.Type, id : Int? = nil, doThis : (id : Int) -> Void) {
+	public func on<T : Sqlable>(change : Change, to : T.Type, id : Int? = nil, doThis : (id : Int) throws -> Void) {
 		eventHandlers.append((change, to.tableName, id, doThis))
 	}
 	
@@ -106,7 +106,11 @@ public class SqliteDatabase {
 					break
 				}
 				
-				eventHandler.callback(update.id)
+				do {
+					try eventHandler.callback(update.id)
+				} catch let error {
+					fail(error)
+				}
 			}
 		}
 	}
