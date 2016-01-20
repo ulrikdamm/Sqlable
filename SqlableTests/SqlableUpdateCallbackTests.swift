@@ -156,7 +156,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 	func testEventHandlerInsert() {
 		var didCall = false
 		
-		db.on(.Insert, to: TestTable.self) { _ in
+		db.observe(.Insert, on: TestTable.self) { _ in
 			didCall = true
 		}
 		
@@ -170,7 +170,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		
 		try! TestTable(id: 2, value1: 1, value2: "").insert().run(db)
 		
-		db.on(.Update, to: TestTable.self) { id in
+		db.observe(.Update, on: TestTable.self) { id in
 			XCTAssert(didCall == false)
 			XCTAssert(id == 2)
 			didCall = true
@@ -188,7 +188,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		try! TestTable(id: 2, value1: 1, value2: "").insert().run(db)
 		try! TestTable(id: 3, value1: 1, value2: "").insert().run(db)
 		
-		db.on(.Update, to: TestTable.self, id: 2) { id in
+		db.observe(.Update, on: TestTable.self, id: 2) { id in
 			XCTAssert(didCall == false)
 			XCTAssert(id == 2)
 			didCall = true
@@ -205,7 +205,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		
 		try! TestTable(id: 2, value1: 1, value2: "").insert().run(db)
 		
-		db.on(.Delete, to: TestTable.self) { id in
+		db.observe(.Delete, on: TestTable.self) { id in
 			XCTAssert(didCall == false)
 			XCTAssert(id == 2)
 			didCall = true
@@ -223,7 +223,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		try! TestTable(id: 2, value1: 1, value2: "").insert().run(db)
 		try! TestTable(id: 3, value1: 1, value2: "").insert().run(db)
 		
-		db.on(.Delete, to: TestTable.self, id: 2) { id in
+		db.observe(.Delete, on: TestTable.self, id: 2) { id in
 			XCTAssert(didCall == false)
 			XCTAssert(id == 2)
 			didCall = true
@@ -234,5 +234,54 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		try! TestTable(id: 3, value1: 1, value2: "hi!").delete().run(db)
 		
 		XCTAssert(didCall)
+	}
+	
+	func testMultipleEventHandlers() {
+		var didCall = 0
+		
+		db.observe(.Insert, on: TestTable.self, id: 1) { id in
+			XCTAssert(id == 1)
+			didCall += 1
+		}
+		
+		db.observe(.Insert, on: TestTable.self, id: 2) { id in
+			XCTAssert(id == 2)
+			didCall += 1
+		}
+		
+		try! TestTable(id: 1, value1: 1, value2: "").insert().run(db)
+		try! TestTable(id: 2, value1: 1, value2: "").insert().run(db)
+		
+		XCTAssert(didCall == 2)
+	}
+	
+	func testEventHandlerWithoutSpecificChange() {
+		var didCall = 0
+		
+		db.observe(on: TestTable.self) { _ in
+			didCall += 1
+		}
+		
+		try! TestTable(id: 1, value1: 1, value2: "").insert().run(db)
+		try! TestTable(id: 1, value1: 1, value2: "Hi!").update().run(db)
+		try! TestTable(id: 1, value1: 1, value2: "Hi!").delete().run(db)
+		
+		XCTAssert(didCall == 3)
+	}
+	
+	func testDeregisterEventHandler() {
+		var didCall = 0
+		
+		let id = db.observe(on: TestTable.self) { _ in
+			didCall += 1
+		}
+		
+		try! TestTable(id: 1, value1: 1, value2: "").insert().run(db)
+		
+		db.removeObserver(id)
+		
+		try! TestTable(id: 2, value1: 1, value2: "").insert().run(db)
+		
+		XCTAssert(didCall == 1)
 	}
 }

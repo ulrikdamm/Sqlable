@@ -39,7 +39,7 @@ public class SqliteDatabase {
 	public var didUpdate : ((table : String, id : Int, change : Change) -> Void)?
 	public var didFail : (String -> Void)?
 	
-	var eventHandlers : [(change : Change, tableName : String, id : Int?, callback : Int throws -> Void)] = []
+	var eventHandlers : [String : (change : Change?, tableName : String, id : Int?, callback : Int throws -> Void)] = [:]
 	
 	var pendingUpdates : [[(change : Change, tableName : String, id : Int)]] = []
 	
@@ -56,8 +56,14 @@ public class SqliteDatabase {
 		sqlite3_update_hook(db, onUpdate, unsafeBitCast(self, UnsafeMutablePointer<Void>.self))
 	}
 	
-	public func on<T : Sqlable>(change : Change, to : T.Type, id : Int? = nil, doThis : (id : Int) throws -> Void) {
-		eventHandlers.append((change, to.tableName, id, doThis))
+	public func observe<T : Sqlable>(change : Change? = nil, on : T.Type, id : Int? = nil, doThis : (id : Int) throws -> Void) -> String {
+		let handlerId = NSUUID().UUIDString
+		eventHandlers[handlerId] = (change, on.tableName, id, doThis)
+		return handlerId
+	}
+	
+	public func removeObserver(id : String) {
+		eventHandlers.removeValueForKey(id)
 	}
 	
 	static func openDatabase(filepath : String) throws -> COpaquePointer {
@@ -100,8 +106,12 @@ public class SqliteDatabase {
 	func notifyAboutUpdate(update : (change : Change, tableName : String, id : Int)) {
 		didUpdate?(table: update.tableName, id: update.id, change: update.change)
 		
-		for eventHandler in eventHandlers {
-			if (update.change == eventHandler.change && update.tableName == eventHandler.tableName) {
+		for (_, eventHandler) in eventHandlers {
+			if update.tableName == eventHandler.tableName {
+				if let change = eventHandler.change where change != update.change {
+					continue
+				}
+				
 				if let id = eventHandler.id where id != update.id {
 					continue
 				}
