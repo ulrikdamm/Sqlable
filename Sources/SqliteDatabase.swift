@@ -169,7 +169,7 @@ public class SqliteDatabase {
 		pendingUpdates.popLast()
 	}
 	
-	public func transaction<T>(block : SqliteDatabase throws -> T) throws -> T {
+	public func transaction<T>(@noescape block : SqliteDatabase throws -> T) throws -> T {
 		let level = try beginTransaction()
 		
 		let value : T
