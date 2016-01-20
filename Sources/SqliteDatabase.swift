@@ -103,7 +103,7 @@ public class SqliteDatabase {
 		for eventHandler in eventHandlers {
 			if (update.change == eventHandler.change && update.tableName == eventHandler.tableName) {
 				if let id = eventHandler.id where id != update.id {
-					break
+					continue
 				}
 				
 				do {
