@@ -89,10 +89,32 @@ try bike.delete().run(db)
 
 ### Transactions
 
+Transactions are very simple to do:
+
 ```swift
 try db.transaction { db in
 	if try Bicycle.count().run(db) == 0 {
 		try bike.insert().run(db)
+	}
+}
+```
+
+You can also do rollbacks:
+
+```swift
+try db.beginTransaction()
+try bike.insert().run(db)
+try db.rollbackTransaction()
+```
+
+And nested transactions! (*new in 1.1.1!*)
+
+```swift
+try db.transaction { db in
+	try db.transaction { db in
+		if try Bicycle.count().run(db) == 0 {
+			try bike.insert().run(db)
+		}
 	}
 }
 ```
@@ -161,22 +183,39 @@ db.didUpdate = { table, id, change in
 But even better, you can register event callbacks on specific actions, tables and ids:
 
 ```swift
-db.on(.Insert, to: Bicycle.self) { id in
+db.observe(.Insert, on: Bicycle.self) { id in
 	print("Inserted bicykle \(id)")
 }
 
-db.on(.Update, to: Bicycle.self, id: 2) { id in
+db.observe(.Update, on: Bicycle.self, id: 2) { id in
 	print("Bicykle 2 has been updated")
 }
 
-db.on(.Delete, to: Bicycle.self) { id in
+db.observe(.Delete, on: Bicycle.self) { id in
 	print("Bicykle \(id) has been deleted")
+}
+
+db.observe(on: Bicycle.self) { id in
+	print("Something was updated on bicycle \(id)")
 }
 ```
 
 ### Swift style error handling
 
 Every function call that can fail is marked with throws, so you can handle every error that can possibly happen.
+
+The APIs are also constructed so that you can set up your statements without touching the database, so you can set everything up without any error handling:
+
+```swift
+let idFilter = Bicycle.id > 2 && Bicyckle.id < 10
+let read = Bicycle.read().filter(idFilter).limit(2)
+
+do {
+	let result = read.run(db)
+} catch let error {
+	// handle error
+}
+```
 
 It also supports an optional handy callback for when any error occurs, which you can use if it fits into your app. Just call the `fail` method on your database handler when you encounter an error like this:
 
@@ -195,6 +234,28 @@ db.didFail = { error in
 	print("Oh no! \(error)")
 }
 ```
+
+### Concurrency
+
+(*new in 1.2!*)
+
+Ever had to deal with concurrency in Core Data? Don't worry, Sqlable is nothing like that.
+
+Each SqliteDatabase instance is unique to one thread/queue. If you want to run some code in the background, you can create a child instance:
+
+```swift
+let child = try db.createChild()
+
+dispatch_async(background_queue) {
+	for bicycle in try! Bicycle.read().run(child) {
+		...
+	}
+}
+```
+
+That's the only rule: keep each instance unique on its thread/queue. Sqlable and Sqlite will take care of locking the database correctly. The parent will even get update notifications from changes made in the child. If you want some database operations to happen serially, you can put them in a transaction, which will automatically lock the database on all threads.
+
+Also, since model instances are just value types, you can freely move them around on threads. If you need to load 10.000.000 bicycles from your database, just run the read query in the background, and dispatch the result to the main queue.
 
 ## How do I install it?
 
