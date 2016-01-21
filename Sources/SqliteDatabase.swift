@@ -22,6 +22,10 @@ public protocol SqlPrintable {
 }
 public class SqliteDatabase {
 	let db : COpaquePointer!
+	let filepath : String
+	
+	var parent : SqliteDatabase?
+	public var queue = dispatch_get_main_queue()
 	
 	public var debug = false
 	
@@ -44,6 +48,8 @@ public class SqliteDatabase {
 	var pendingUpdates : [[(change : Change, tableName : String, id : Int)]] = []
 	
 	public init(filepath : String) throws {
+		self.filepath = filepath
+		
 		do {
 			db = try SqliteDatabase.openDatabase(filepath)
 		} catch let error {
@@ -52,6 +58,7 @@ public class SqliteDatabase {
 		}
 		
 		try execute("pragma foreign_keys = on")
+		try execute("pragma busy_timeout = 10000")
 		
 		sqlite3_update_hook(db, onUpdate, unsafeBitCast(self, UnsafeMutablePointer<Void>.self))
 	}
@@ -81,6 +88,12 @@ public class SqliteDatabase {
 		if let db = db {
 			sqlite3_close(db)
 		}
+	}
+	
+	public func createChild() throws -> SqliteDatabase {
+		let db = try SqliteDatabase(filepath: filepath)
+		db.parent = self
+		return db
 	}
 	
 	public func fail(error : ErrorType) {
@@ -123,6 +136,12 @@ public class SqliteDatabase {
 				}
 			}
 		}
+		
+		if let parent = parent {
+			dispatch_async(parent.queue) {
+				parent.notifyAboutUpdate(update)
+			}
+		}
 	}
 	
 	public func execute(statement : String) throws {
@@ -139,14 +158,23 @@ public class SqliteDatabase {
 	}
 	
 	public func beginTransaction() throws -> Int {
-		try execute("savepoint level_\(transactionLevel + 1)")
+		if transactionLevel == 0 {
+			try execute("begin deferred transaction")
+		} else {
+			try execute("savepoint level_\(transactionLevel + 1)")
+		}
+		
 		pendingUpdates.append([])
 		transactionLevel += 1
 		return transactionLevel
 	}
 	
 	public func commitTransaction() throws {
-		try execute("release level_\(transactionLevel)")
+		if transactionLevel == 1 {
+			try execute("commit transaction")
+		} else {
+			try execute("release level_\(transactionLevel)")
+		}
 		
 		transactionLevel -= 1
 		
@@ -164,7 +192,12 @@ public class SqliteDatabase {
 		
 		guard finalLevel <= transactionLevel else { return }
 		
-		try execute("rollback to level_\(finalLevel)")
+		if finalLevel == 1 {
+			try execute("rollback transaction")
+		} else {
+			try execute("rollback to level_\(finalLevel)")
+		}
+		
 		transactionLevel = finalLevel - 1
 		pendingUpdates.popLast()
 	}

@@ -22,6 +22,7 @@
 		FF94F2D81BDE2634009AD0C9 /* Sqlable.h in Headers */ = {isa = PBXBuildFile; fileRef = FF94F2D71BDE2634009AD0C9 /* Sqlable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FF94F2DF1BDE2634009AD0C9 /* Sqlable.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF94F2D41BDE2633009AD0C9 /* Sqlable.framework */; };
 		FF94F2E41BDE2634009AD0C9 /* SqlableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF94F2E31BDE2634009AD0C9 /* SqlableTests.swift */; };
+		FFA5AEA41C5184A4000DEAEE /* SqlableConcurrencyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFA5AEA31C5184A4000DEAEE /* SqlableConcurrencyTests.swift */; };
 		FFBF88CD1C491AB2005695A3 /* SqlableExpressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFBF88CC1C491AB2005695A3 /* SqlableExpressionTests.swift */; };
 		FFBF88D51C4AA23C005695A3 /* SqlableUpdateCallbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFBF88D41C4AA23C005695A3 /* SqlableUpdateCallbackTests.swift */; };
 		FFD9DEB71C20718800CC4709 /* SqlableConstraintTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFD9DEB61C20718800CC4709 /* SqlableConstraintTests.swift */; };
@@ -57,6 +58,7 @@
 		FF94F2DE1BDE2634009AD0C9 /* SqlableTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SqlableTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF94F2E31BDE2634009AD0C9 /* SqlableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SqlableTests.swift; sourceTree = "<group>"; };
 		FF94F2E51BDE2634009AD0C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FFA5AEA31C5184A4000DEAEE /* SqlableConcurrencyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SqlableConcurrencyTests.swift; sourceTree = "<group>"; };
 		FFBF88CC1C491AB2005695A3 /* SqlableExpressionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SqlableExpressionTests.swift; sourceTree = "<group>"; };
 		FFBF88D41C4AA23C005695A3 /* SqlableUpdateCallbackTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SqlableUpdateCallbackTests.swift; sourceTree = "<group>"; };
 		FFCD6A981C1A1B240021ED87 /* Package.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
@@ -122,13 +124,14 @@
 		FF94F2E21BDE2634009AD0C9 /* SqlableTests */ = {
 			isa = PBXGroup;
 			children = (
+				FF94F2E51BDE2634009AD0C9 /* Info.plist */,
 				FF94F2E31BDE2634009AD0C9 /* SqlableTests.swift */,
 				FF28039A1C2215B7004BE4AA /* SqlableForeignKeyTests.swift */,
 				FFD9DEB61C20718800CC4709 /* SqlableConstraintTests.swift */,
 				FF2803951C22085F004BE4AA /* SqlableTransactionTests.swift */,
 				FFBF88CC1C491AB2005695A3 /* SqlableExpressionTests.swift */,
 				FFBF88D41C4AA23C005695A3 /* SqlableUpdateCallbackTests.swift */,
-				FF94F2E51BDE2634009AD0C9 /* Info.plist */,
+				FFA5AEA31C5184A4000DEAEE /* SqlableConcurrencyTests.swift */,
 			);
 			path = SqlableTests;
 			sourceTree = "<group>";
@@ -281,6 +284,7 @@
 				FF28039B1C2215B7004BE4AA /* SqlableForeignKeyTests.swift in Sources */,
 				FF2803961C22085F004BE4AA /* SqlableTransactionTests.swift in Sources */,
 				FFBF88D51C4AA23C005695A3 /* SqlableUpdateCallbackTests.swift in Sources */,
+				FFA5AEA41C5184A4000DEAEE /* SqlableConcurrencyTests.swift in Sources */,
 				FFD9DEB71C20718800CC4709 /* SqlableConstraintTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
