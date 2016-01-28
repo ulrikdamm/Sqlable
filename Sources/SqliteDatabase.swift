@@ -58,9 +58,16 @@ public class SqliteDatabase {
 		}
 		
 		try execute("pragma foreign_keys = on")
-		try execute("pragma busy_timeout = 10000")
+		try execute("pragma journal_mode = WAL")
+		try execute("pragma busy_timeout = 1000000")
 		
 		sqlite3_update_hook(db, onUpdate, unsafeBitCast(self, UnsafeMutablePointer<Void>.self))
+	}
+	
+	public static func deleteDatabase(at filepath : String) throws {
+		try NSFileManager.defaultManager().removeItemAtPath(filepath)
+		try NSFileManager.defaultManager().removeItemAtPath(filepath + "-shm")
+		try NSFileManager.defaultManager().removeItemAtPath(filepath + "-wal")
 	}
 	
 	public func observe<T : Sqlable>(change : Change? = nil, on : T.Type, id : Int? = nil, doThis : (id : Int) throws -> Void) -> String {
@@ -239,30 +246,58 @@ public class SqliteDatabase {
 		let returnValue : Any
 		
 		switch statement.operation {
-		case .Update, .Delete:
-			if sqlite3_step(handle) != SQLITE_DONE {
-				try throwLastError(db)
+		case .Insert, .Update, .Delete:
+			var waits = 1000
+			
+			loop: while true {
+				switch sqlite3_step(handle) {
+				case SQLITE_ROW: continue
+				case SQLITE_DONE: break loop
+				case SQLITE_BUSY:
+					if waits == 0 { try throwLastError(db) }
+					waits -= 1
+					usleep(10000)
+				case _: try throwLastError(db)
+				}
 			}
 			
-			returnValue = Void()
-		case .Insert:
-			if sqlite3_step(handle) != SQLITE_DONE {
-				try throwLastError(db)
+			if case .Insert = statement.operation {
+				returnValue = Int(sqlite3_last_insert_rowid(db))
+			} else {
+				returnValue = Void()
 			}
-			
-			returnValue = Int(sqlite3_last_insert_rowid(db))
 		case .Count:
-			if sqlite3_step(handle) != SQLITE_ROW { try throwLastError(db) }
-			returnValue = Int(sqlite3_column_int64(handle, Int32(0)))
+			var waits = 1000
 			
-			if debug {
-				let indentation = (0..<transactionLevel).map { _ in "  " }.joinWithSeparator("")
-				print("\(indentation)SQL result: \(returnValue)") }
+			loop: while true {
+				switch sqlite3_step(handle) {
+				case SQLITE_ROW: break loop
+				case SQLITE_DONE: break loop
+				case SQLITE_BUSY:
+					if waits == 0 { try throwLastError(db) }
+					waits -= 1
+					usleep(10000)
+				case _: try throwLastError(db)
+				}
+			}
+			
+			returnValue = Int(sqlite3_column_int64(handle, 0))
 		case .Select:
 			var rows : [T] = []
 			
-			while sqlite3_step(handle) == SQLITE_ROW {
-				rows.append(try T(row: ReadRow<T>(handle: handle)))
+			var waits = 1000
+			loop: while true {
+				switch sqlite3_step(handle) {
+				case SQLITE_ROW:
+					rows.append(try T(row: ReadRow<T>(handle: handle)))
+					continue
+				case SQLITE_DONE: break loop
+				case SQLITE_BUSY:
+					if waits == 0 { try throwLastError(db) }
+					waits -= 1
+					usleep(10000)
+				case _: try throwLastError(db)
+				}
 			}
 			
 			if statement.single {
@@ -270,16 +305,25 @@ public class SqliteDatabase {
 			} else {
 				returnValue = rows
 			}
-			
-			if debug {
+		}
+		
+		if debug {
+			switch statement.operation {
+			case .Count, .Select:
 				let indentation = (0..<transactionLevel).map { _ in "  " }.joinWithSeparator("")
-				print("\(indentation)SQL result: \(returnValue)") }
+				print("\(indentation)SQL result: \(returnValue)")
+			case _: break
+			}
 		}
 		
 		if sqlite3_finalize(handle) != SQLITE_OK {
 			try throwLastError(db)
 		}
-		
+//		
+//		if transactionLevel == 0 {
+//			sqlite3_wal_checkpoint(db, <#T##zDb: UnsafePointer<Int8>##UnsafePointer<Int8>#>)
+//		}
+//		
 		return returnValue
 	}
 	
@@ -293,8 +337,9 @@ public class SqliteDatabase {
 func throwLastError(db : COpaquePointer) throws {
 	let errorCode = Int(sqlite3_errcode(db))
 	let reason = String.fromCString(sqlite3_errmsg(db))
+	let extendedError = Int(sqlite3_extended_errcode(db))
 	
-	print("SQL ERROR \(errorCode): \(reason ?? "Unknown error")")
+	print("SQL ERROR \(errorCode) (\(extendedError)): \(reason ?? "Unknown error")")
 	
 	throw sqlErrorForCode(errorCode)
 }

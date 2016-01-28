@@ -14,7 +14,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 	var db : SqliteDatabase!
 	
 	override func setUp() {
-		_ = try? NSFileManager.defaultManager().removeItemAtPath(path)
+		try! SqliteDatabase.deleteDatabase(at: path)
 		db = try! SqliteDatabase(filepath: path)
 		
 		try! db.createTable(TestTable.self)

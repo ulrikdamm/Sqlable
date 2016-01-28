@@ -62,9 +62,8 @@ class SqliteForeignKeyTests: XCTestCase {
 	var db : SqliteDatabase!
 	
 	override func setUp() {
-		_ = try? NSFileManager.defaultManager().removeItemAtPath(path)
+		try! SqliteDatabase.deleteDatabase(at: path)
 		db = try! SqliteDatabase(filepath: path)
-		db.debug = true
 		
 		try! db.createTable(Table1.self)
 		try! db.createTable(Table2.self)

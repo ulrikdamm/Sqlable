@@ -15,7 +15,7 @@ class SqliteConcurrencyTests : XCTestCase {
 	let background = dispatch_get_global_queue(0, 0)
 	
 	override func setUp() {
-		_ = try? NSFileManager.defaultManager().removeItemAtPath(path)
+		try! SqliteDatabase.deleteDatabase(at: path)
 		db = try! SqliteDatabase(filepath: path)
 		
 		try! db.createTable(TestTable.self)
@@ -103,7 +103,10 @@ class SqliteConcurrencyTests : XCTestCase {
 		
 		dispatch_async(background) {
 			didCallBackground = true
-			try! TestTable(id: 3, value1: 3, value2: "background").insert().run(child)
+			
+			try! child.transaction { child in
+				try! TestTable(id: 3, value1: 3, value2: "background").insert().run(child)
+			}
 		}
 		
 		sleep(1)

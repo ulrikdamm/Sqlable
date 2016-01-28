@@ -44,7 +44,7 @@ class SqliteConstraintsTests: XCTestCase {
 	var db : SqliteDatabase!
 	
 	override func setUp() {
-		_ = try? NSFileManager.defaultManager().removeItemAtPath(path)
+		try! SqliteDatabase.deleteDatabase(at: path)
 		db = try! SqliteDatabase(filepath: path)
 		
 		try! db.createTable(Table.self)
@@ -60,16 +60,19 @@ class SqliteConstraintsTests: XCTestCase {
 	}
 	
 	func testUniqueConstraintViolation() {
+		var didFail = false
+		
 		do {
 			try Table(id: nil, value1: 1, value2: 2).insert().run(db)
 			try Table(id: nil, value1: 1, value2: 2).insert().run(db)
 		} catch SqlError.SqliteConstraintViolation(_) {
-			// Expected
+			didFail = true
 		} catch let error {
 			XCTAssert(false, "Failed with error: \(error)")
 		}
 		
-		XCTAssert(try! Table.count().run(db) == 1)
+		XCTAssert(didFail)
+		XCTAssertEqual(try! Table.count().run(db), 1)
 	}
 	
 	func testConstraintViolationRollback() {
