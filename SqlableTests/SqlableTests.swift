@@ -70,7 +70,7 @@ class SqliteDatabaseTests: XCTestCase {
 	var db : SqliteDatabase!
 	
 	override func setUp() {
-		try! SqliteDatabase.deleteDatabase(at: path)
+		_ = try? SqliteDatabase.deleteDatabase(at: path)
 		db = try! SqliteDatabase(filepath: path)
 	}
 	
@@ -253,5 +253,18 @@ class SqliteDatabaseTests: XCTestCase {
 		
 		let count = try! User.count().filter(User.name == "Luz").run(db)
 		XCTAssert(count == 1)
+	}
+	
+	// Regression test for bug found by siuying (https://github.com/ulrikdamm/Sqlable/issues/2)
+	func testById() {
+		try! db.createTable(Group.self)
+		let group = Group(id: 0)
+		try! group.insert().run(db)
+		
+		if let _ = try! Group.byId(1).run(db).value {
+			XCTFail("group should not be found")
+		} else {
+			XCTAssert(true)
+		}
 	}
 }

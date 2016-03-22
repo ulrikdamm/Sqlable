@@ -44,7 +44,7 @@ class SqliteConstraintsTests: XCTestCase {
 	var db : SqliteDatabase!
 	
 	override func setUp() {
-		try! SqliteDatabase.deleteDatabase(at: path)
+		_ = try? SqliteDatabase.deleteDatabase(at: path)
 		db = try! SqliteDatabase(filepath: path)
 		
 		try! db.createTable(Table.self)

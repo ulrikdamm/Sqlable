@@ -20,6 +20,18 @@ public enum OnConflict {
 	case Replace
 }
 
+public enum SingleResult<T> {
+	case NoResult
+	case Result(T)
+	
+	var value : T? {
+		switch self {
+		case .Result(let value): return value
+		case .NoResult: return nil
+		}
+	}
+}
+
 public struct Statement<T : Sqlable, Return> {
 	let operation : Operation
 	let filterBy : Expression?

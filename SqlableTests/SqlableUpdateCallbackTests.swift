@@ -14,7 +14,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 	var db : SqliteDatabase!
 	
 	override func setUp() {
-		try! SqliteDatabase.deleteDatabase(at: path)
+		_ = try? SqliteDatabase.deleteDatabase(at: path)
 		db = try! SqliteDatabase(filepath: path)
 		
 		try! db.createTable(TestTable.self)
@@ -26,7 +26,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		
 		db.didUpdate = { table, row, change in
 			XCTAssert(inTransaction == false)
-			updateCalls++
+			updateCalls += 1
 		}
 		
 		try! db.transaction { db in
@@ -46,7 +46,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		
 		db.didUpdate = { table, row, change in
 			XCTAssert(inTransaction == false)
-			updateCalls++
+			updateCalls += 1
 		}
 		
 		try! db.beginTransaction()
@@ -66,7 +66,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		
 		db.didUpdate = { table, row, change in
 			XCTAssert(inTransaction == false)
-			updateCalls++
+			updateCalls += 1
 		}
 		
 		try! db.transaction { db in
@@ -88,7 +88,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		
 		db.didUpdate = { table, row, change in
 			XCTAssert(inTransaction == false)
-			updateCalls++
+			updateCalls += 1
 		}
 		
 		try! db.transaction { db in

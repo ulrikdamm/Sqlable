@@ -15,7 +15,7 @@ class SqliteConcurrencyTests : XCTestCase {
 	let background = dispatch_get_global_queue(0, 0)
 	
 	override func setUp() {
-		try! SqliteDatabase.deleteDatabase(at: path)
+		_ = try? SqliteDatabase.deleteDatabase(at: path)
 		db = try! SqliteDatabase(filepath: path)
 		
 		try! db.createTable(TestTable.self)
