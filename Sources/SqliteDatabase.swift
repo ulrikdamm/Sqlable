@@ -6,47 +6,69 @@
 //  Copyright © 2015 Robocat. All rights reserved.
 //
 
+/// Errors to occur when running SQL commands.
 public enum SqlError : ErrorType {
-	case ParseError(String)
+	/// Error when data returned from the database didn't match the defined data types.
 	case ReadError(String)
 	
+	/// Sqlite IO error (database is locked, busy or file IO failed)
 	case SqliteIOError(Int)
+	/// Sqlite error when database has been corrupted.
 	case SqliteCorruptionError(Int)
+	/// Sqlite error when a constraint was violated (e.g. duplicate primary keys, broken foreign keys)
 	case SqliteConstraintViolation(Int)
+	/// Sqlite error when trying to insert a non-integer as a primary key.
 	case SqliteDatatypeMismatch(Int)
+	/// Sqlite error when trying to execute an invalid query.
 	case SqliteQueryError(Int)
 }
 
+/// Something which can be expressed in SQL.
 public protocol SqlPrintable {
 	var sqlDescription : String { get }
 }
+
+/// Class for managing a single database connection.
 public class SqliteDatabase {
 	let db : COpaquePointer!
 	let filepath : String
 	
 	var parent : SqliteDatabase?
+	
+	/// The queue associated with this database connection.
+	/// All operations using this connection should always run on this queue.
+	/// This is also the queue that change notifications are delivered on. You are free to change this value.
 	public var queue = dispatch_get_main_queue()
 	
+	/// Enables or disables print debugging. Will print out all SQL statements executed, and all results returned.
 	public var debug = false
 	
 	static let SQLITE_STATIC = unsafeBitCast(0, sqlite3_destructor_type.self)
 	static let SQLITE_TRANSIENT = unsafeBitCast(-1, sqlite3_destructor_type.self)
 	
-	static let errorDomain = "dk.ufd.Sqlable"
-	
 	var transactionLevel = 0
 	
+	/// The type of change from an update notifications.
 	public enum Change {
 		case Insert, Update, Delete
 	}
 	
+	///	Update callback. This block will be called every time there was an update in the database connection, or any child connection.
 	public var didUpdate : ((table : String, id : Int, change : Change) -> Void)?
+	
+	///	Failure callback. This block will be called whenever an error is delivered via `fail(_:)`.
+	///	- SeeAlso: `fail(_:)`
 	public var didFail : (String -> Void)?
 	
 	var eventHandlers : [String : (change : Change?, tableName : String, id : Int?, callback : Int throws -> Void)] = [:]
 	
 	var pendingUpdates : [[(change : Change, tableName : String, id : Int)]] = []
 	
+	///	Opens a connection to the database at the specified file location. If there is no database file, a new one is created.
+	///	
+	///	- Parameters:
+	///		- filePath: The path of the database file
+	/// - Throws: SqlError if the database couldn't be created
 	public init(filepath : String) throws {
 		self.filepath = filepath
 		
@@ -64,18 +86,39 @@ public class SqliteDatabase {
 		sqlite3_update_hook(db, onUpdate, unsafeBitCast(self, UnsafeMutablePointer<Void>.self))
 	}
 	
+	
+	///	Deletes the database at the specified file location. This also removes any files created by Sqlite, so use this istead of removing the database file manually.
+	///	
+	///	- Parameters:
+	///		- filePath: The path of the database file
+	/// - Throws: Eventual errors from `NSFileManager`
 	public static func deleteDatabase(at filepath : String) throws {
 		try NSFileManager.defaultManager().removeItemAtPath(filepath)
 		try NSFileManager.defaultManager().removeItemAtPath(filepath + "-shm")
 		try NSFileManager.defaultManager().removeItemAtPath(filepath + "-wal")
 	}
 	
+	/// Begin observing a change in the database.
+	/// 
+	/// - Parameters:
+	///		- change: Which change to notify on (insert, update or delete). If nil, notifies on any change.
+	///		- on: Which table (Sqlable type) to observe changes on.
+	///		- id: Which id to observe changes on. If nil, observes any id.
+	///		- doThis: The block called when the specified change has occured in the database.
+	///			Any errors thrown from this call will be passed to `didFail(_:)`.
+	///			- id: The id of the inserted/updated/deleted object.
+	///	- Returns: A string handle you can use for removing the observer if you don't need it anymore.
 	public func observe<T : Sqlable>(change : Change? = nil, on : T.Type, id : Int? = nil, doThis : (id : Int) throws -> Void) -> String {
 		let handlerId = NSUUID().UUIDString
 		eventHandlers[handlerId] = (change, on.tableName, id, doThis)
+		
 		return handlerId
 	}
 	
+	/// Unregisters an observer.
+	///
+	/// Parameters:
+	///		- id: The handle returned from `observe(change:on:id:doThis:)`
 	public func removeObserver(id : String) {
 		eventHandlers.removeValueForKey(id)
 	}
@@ -97,18 +140,25 @@ public class SqliteDatabase {
 		}
 	}
 	
+	/// Creates a child database. Use this if you want to use the database on a separate thread/queue.
+	/// All update notifications from a child connection will also happen in the parent, but not the other way around.
+	///
+	/// - Throws: SqlError if the database connection couldn't be created.
 	public func createChild() throws -> SqliteDatabase {
 		let db = try SqliteDatabase(filepath: filepath)
 		db.parent = self
 		return db
 	}
 	
+	/// Pass a received error to the database. This will create an error with description and return it via `didFail(_:)`
+	///
+	/// Parameters:
+	///		- error: The error to notify of. Should probably be a SqlError, but any error will also work.
 	public func fail(error : ErrorType) {
 		let message : String
 		
 		if let error = error as? SqlError {
 			switch error {
-			case .ParseError(let reason): message = "Parse error: " + reason
 			case .ReadError(let reason): message = "Read error: " + reason
 			case .SqliteIOError(let code): message = "IO error (code \(code))"
 			case .SqliteCorruptionError(let code): message = "Corruption error (code \(code))"
@@ -151,6 +201,12 @@ public class SqliteDatabase {
 		}
 	}
 	
+	/// Execute a raw SQL command.
+	/// Please don't pass any parameters in to this function. This is considered very unsafe. `statement` should be a string literal.
+	///
+	/// - Parameters:
+	///		- statement: The SQL command to run.
+	/// - Throws: SqlError if any errors happened running the command.
 	public func execute(statement : String) throws {
 		let sql = statement.cStringUsingEncoding(NSUTF8StringEncoding)!
 		
@@ -164,6 +220,11 @@ public class SqliteDatabase {
 		}
 	}
 	
+	/// Begin a SQL transaction.
+	/// Should be completed with a call to either `commitTransaction()` or `rollbackTransaction()`.
+	/// You can start transactions inside other transactions.
+	/// 
+	/// - Throws: SqlError if the transaction couldn't start.
 	public func beginTransaction() throws -> Int {
 		if transactionLevel == 0 {
 			try execute("begin deferred transaction")
@@ -176,6 +237,10 @@ public class SqliteDatabase {
 		return transactionLevel
 	}
 	
+	/// Commit a SQL transaction.
+	/// Should be called in correspondance to a `beginTransaction()`.
+	///
+	/// - Throws: SqlError if the transaction couldn't commit.
 	public func commitTransaction() throws {
 		if transactionLevel == 1 {
 			try execute("commit transaction")
@@ -194,6 +259,10 @@ public class SqliteDatabase {
 		}
 	}
 	
+	/// Rolls back changes in a SQL transaction.
+	/// Should be called in correspondance to a `beginTransaction()`.
+	/// 
+	/// - Throws: SqlError if the transaction couldn't roll back.
 	public func rollbackTransaction(level : Int? = nil) throws {
 		let finalLevel = level ?? transactionLevel
 		
@@ -209,6 +278,17 @@ public class SqliteDatabase {
 		pendingUpdates.popLast()
 	}
 	
+	/// Perform a SQL transaction.
+	/// Runs the code within the block in a SQL transaction.
+	/// If any errors occurs in the block, the changes are rolled back.
+	/// Otherwise, they are committed.
+	/// You can start transactions inside other transactions.
+	///
+	/// Parameters:
+	///		- block: The code to be run inside of the transaction.
+	///		The database connection is passed to the block, and any value returned will be the return value of the `transaction(block:)` call.
+	///	Returns: The value returned from the block call.
+	/// Throws: SqlError if the transaction couldn't be started, committed or rolled back, or any error thrown from the block.
 	public func transaction<T>(@noescape block : SqliteDatabase throws -> T) throws -> T {
 		let level = try beginTransaction()
 		
@@ -224,6 +304,12 @@ public class SqliteDatabase {
 		return value
 	}
 	
+	/// Creates the SQL table for a Sqlable type.
+	/// If the table already exists, no operation is performed.
+	///
+	/// - Parameters:
+	///		- _: A Sqlable type (use e.g. Table.self)
+	/// - Throws: A SqlError if the table couldn't be created.
 	public func createTable<T : Sqlable>(_ : T.Type) throws {
 		try execute(T.createTable())
 	}
@@ -301,7 +387,11 @@ public class SqliteDatabase {
 			}
 			
 			if statement.single {
-				returnValue = rows.first
+				if let first = rows.first {
+					returnValue = SingleResult.Result(first)
+				} else {
+					returnValue = SingleResult<T>.NoResult
+				}
 			} else {
 				returnValue = rows
 			}
@@ -319,11 +409,7 @@ public class SqliteDatabase {
 		if sqlite3_finalize(handle) != SQLITE_OK {
 			try throwLastError(db)
 		}
-//		
-//		if transactionLevel == 0 {
-//			sqlite3_wal_checkpoint(db, <#T##zDb: UnsafePointer<Int8>##UnsafePointer<Int8>#>)
-//		}
-//		
+		
 		return returnValue
 	}
 	
