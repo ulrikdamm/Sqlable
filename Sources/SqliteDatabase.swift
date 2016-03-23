@@ -301,7 +301,11 @@ public class SqliteDatabase {
 			}
 			
 			if statement.single {
-				returnValue = rows.first
+				if let first = rows.first {
+					returnValue = SingleResult.Result(first)
+				} else {
+					returnValue = SingleResult<T>.NoResult
+				}
 			} else {
 				returnValue = rows
 			}
