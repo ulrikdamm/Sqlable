@@ -100,7 +100,7 @@ public extension Sqlable {
 	}
 	
 	@warn_unused_result
-	static func byId(id : SqlValue) -> Statement<Self, Self?> {
+	static func byId(id : SqlValue) -> Statement<Self, SingleResult<Self>> {
 		guard let primary = primaryColumn() else { fatalError("\(self.dynamicType) have no primary key") }
 		return Statement(operation: .Select(Self.tableLayout))
 			.filter(primary == id)
