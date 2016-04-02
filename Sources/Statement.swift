@@ -35,7 +35,7 @@ public enum SingleResult<T> {
 	case NoResult
 	case Result(T)
 	
-	var value : T? {
+	public var value : T? {
 		switch self {
 		case .Result(let value): return value
 		case .NoResult: return nil
