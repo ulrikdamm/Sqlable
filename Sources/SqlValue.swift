@@ -8,7 +8,9 @@
 
 import Foundation
 
+/// A value which can be used to write to a sql row
 public protocol SqlValue {
+	/// Bind the value of the type to a position in a write handle
 	func bind(db : COpaquePointer, handle : COpaquePointer, index : Int32) throws
 }
 
@@ -60,9 +62,11 @@ extension Bool : SqlValue {
 	}
 }
 
-public struct Null : NilLiteralConvertible {
-	public init() {}
-	public init(nilLiteral : Void) {}
+/// A SQL null
+public struct Null {
+	public init() {
+		
+	}
 }
 
 extension Null : SqlValue {

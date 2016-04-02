@@ -8,12 +8,14 @@
 
 import Foundation
 
+/// A row returned from the SQL database, from which you can read column values
 public struct ReadRow<T : Sqlable> {
 	private let handle : COpaquePointer
 	let type = T.self
 	
 	let columnIndex : [String: Int]
 	
+	/// Create a read row from a SQLite handle
 	public init(handle : COpaquePointer) {
 		self.handle = handle
 		
@@ -27,31 +29,61 @@ public struct ReadRow<T : Sqlable> {
 		self.columnIndex = columnIndex
 	}
 	
+	/// Read an integer value for a column
+	/// 
+	///	- Parameters:
+	///		- column: A column from a Sqlable type
+	/// - Returns: The integer value for that column in the current row
 	public func get(column : Column) throws -> Int {
 		let index = try columnIndex(column)
 		return Int(sqlite3_column_int64(handle, index))
 	}
 	
+	/// Read a double value for a column
+	/// 
+	///	- Parameters:
+	///		- column: A column from a Sqlable type
+	/// - Returns: The double value for that column in the current row
 	public func get(column : Column) throws -> Double {
 		let index = try columnIndex(column)
 		return Double(sqlite3_column_double(handle, index))
 	}
 	
+	/// Read a string value for a column
+	/// 
+	///	- Parameters:
+	///		- column: A column from a Sqlable type
+	/// - Returns: The string value for that column in the current row
 	public func get(column : Column) throws -> String {
 		let index = try columnIndex(column)
 		return String.fromCString(UnsafePointer<Int8>(sqlite3_column_text(handle, index)))!
 	}
 	
+	/// Read a date value for a column
+	/// 
+	///	- Parameters:
+	///		- column: A column from a Sqlable type
+	/// - Returns: The date value for that column in the current row
 	public func get(column : Column) throws -> NSDate {
 		let timestamp : Int = try get(column)
 		return NSDate(timeIntervalSince1970: NSTimeInterval(timestamp))
 	}
 	
+	/// Read a boolean value for a column
+	/// 
+	///	- Parameters:
+	///		- column: A column from a Sqlable type
+	/// - Returns: The boolean value for that column in the current row
 	public func get(column : Column) throws -> Bool {
 		let index = try columnIndex(column)
 		return sqlite3_column_int(handle, index) == 0 ? false : true
 	}
 	
+	/// Read an optional integer value for a column
+	/// 
+	///	- Parameters:
+	///		- column: A column from a Sqlable type
+	/// - Returns: The integer value for that column in the current row or nil if null
 	public func get(column : Column) throws -> Int? {
 		let index = try columnIndex(column)
 		if sqlite3_column_type(handle, index) == SQLITE_NULL {
@@ -62,6 +94,11 @@ public struct ReadRow<T : Sqlable> {
 		}
 	}
 	
+	/// Read an optional double value for a column
+	/// 
+	///	- Parameters:
+	///		- column: A column from a Sqlable type
+	/// - Returns: The double value for that column in the current row or nil if null
 	public func get(column : Column) throws -> Double? {
 		let index = try columnIndex(column)
 		if sqlite3_column_type(handle, index) == SQLITE_NULL {
@@ -72,6 +109,11 @@ public struct ReadRow<T : Sqlable> {
 		}
 	}
 	
+	/// Read an optional string value for a column
+	/// 
+	///	- Parameters:
+	///		- column: A column from a Sqlable type
+	/// - Returns: The string value for that column in the current row or nil if null
 	public func get(column : Column) throws -> String? {
 		let index = try columnIndex(column)
 		if sqlite3_column_type(handle, index) == SQLITE_NULL {
@@ -82,6 +124,11 @@ public struct ReadRow<T : Sqlable> {
 		}
 	}
 	
+	/// Read an optional date value for a column
+	/// 
+	///	- Parameters:
+	///		- column: A column from a Sqlable type
+	/// - Returns: The date value for that column in the current row or nil if null
 	public func get(column : Column) throws -> NSDate? {
 		let index = try columnIndex(column)
 		if sqlite3_column_type(handle, index) == SQLITE_NULL {
@@ -92,6 +139,11 @@ public struct ReadRow<T : Sqlable> {
 		}
 	}
 	
+	/// Read an optional boolean value for a column
+	/// 
+	///	- Parameters:
+	///		- column: A column from a Sqlable type
+	/// - Returns: The boolean value for that column in the current row or nil if null
 	public func get(column : Column) throws -> Bool? {
 		let index = try columnIndex(column)
 		if sqlite3_column_type(handle, index) == SQLITE_NULL {
