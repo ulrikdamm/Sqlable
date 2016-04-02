@@ -8,6 +8,7 @@
 
 import Foundation
 
+/// A value which can either be a column reference or a primitive value
 public enum ColumnOrValue : SqlPrintable {
 	case TableColumn(Column)
 	case Value(SqlValue)
@@ -36,16 +37,27 @@ public enum ColumnOrValue : SqlPrintable {
 	}
 }
 
+/// A SQL expression for filters
 public indirect enum Expression : SqlPrintable {
+	/// Both expressions must be true
 	case And(Expression, Expression)
+	/// Either expression must be true
 	case Or(Expression, Expression)
+	/// A column must have a specific value
 	case EqualsValue(Column, SqlValue)
+	/// An expression must be false
 	case Inverse(Expression)
+	/// A column must have a value less than the specified
 	case LessThan(Column, SqlValue)
+	/// A column must have a value less than or equal to the specified
 	case LessThanOrEqual(Column, SqlValue)
+	/// A column must have a value greater than the specified
 	case GreaterThan(Column, SqlValue)
+	/// A column must have a value greater than or equal to the specified
 	case GreaterThanOrEqual(Column, SqlValue)
+	/// A column must have a value in the specified list of values
 	case In(Column, [SqlValue])
+	/// Access a raw SQL function and run it with the given operands
 	case Function(name : String, operands : [ColumnOrValue])
 	
 	public var sqlDescription : String {
@@ -86,61 +98,75 @@ public indirect enum Expression : SqlPrintable {
 }
 
 extension Column {
+	/// A column must have a value in the specified list of values (for use in filters) 
 	public func contains(values : [SqlValue]) -> Expression {
 		return .In(self, values)
 	}
 	
+	/// A string column must have a value 'like' the given string (see the SQLite documentation for 'like') (for use in filters)
 	public func like(string : String) -> Expression {
 		return .Function(name: "like", operands: [.Value(string), .TableColumn(self)])
 	}
 }
 
+/// A column must have a value in the specified list of values (for use in filters)
 public func contains(lhs : Column, _ rhs : [SqlValue]) -> Expression {
 	return .In(lhs, rhs)
 }
 
 infix operator ∈ {}
 
+/// A column must have a value in the specified list of values
 public func ∈(lhs : Column, rhs : [SqlValue]) -> Expression {
 	return .In(lhs, rhs)
 }
 
+/// A column must have a specific value
 public func ==(lhs : Column, rhs : SqlValue) -> Expression {
 	return .EqualsValue(lhs, rhs)
 }
 
+/// A column must not have a specific value
 public func !=(lhs : Column, rhs : SqlValue) -> Expression {
 	return .Inverse(.EqualsValue(lhs, rhs))
 }
 
+/// A column must have a value less than the specified
 public func <(lhs : Column, rhs : SqlValue) -> Expression {
 	return .LessThan(lhs, rhs)
 }
 
+/// A column must have a value less than or equal to the specified
 public func <=(lhs : Column, rhs : SqlValue) -> Expression {
 	return .LessThanOrEqual(lhs, rhs)
 }
 
+/// A column must have a value greater than the specified
 public func >(lhs : Column, rhs : SqlValue) -> Expression {
 	return .GreaterThan(lhs, rhs)
 }
 
+/// A column must have a value greater than or equal to the specified
 public func >=(lhs : Column, rhs : SqlValue) -> Expression {
 	return .GreaterThanOrEqual(lhs, rhs)
 }
 
+/// Both expressions must be true
 public func &&(lhs : Expression, rhs : Expression) -> Expression {
 	return .And(lhs, rhs)
 }
 
+/// Either expression must be true
 public func ||(lhs : Expression, rhs : Expression) -> Expression {
 	return .Or(lhs, rhs)
 }
 
+/// An expression must be false
 public prefix func !(value : Expression) -> Expression {
 	return .Inverse(value)
 }
 
+/// An column must be null
 public prefix func !(column : Column) -> Expression {
 	return column == Null()
 }

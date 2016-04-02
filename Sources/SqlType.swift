@@ -6,12 +6,19 @@
 //  Copyright © 2015 Robocat. All rights reserved.
 //
 
+/// A SQL type
 public enum SqlType : Equatable {
+	/// An integer
 	case Integer
+	/// A double
 	case Real
+	/// A string
 	case Text
+	/// A date
 	case Date
+	/// A boolean
 	case Boolean
+	/// A nullable SQL type
 	indirect case Nullable(SqlType)
 }
 

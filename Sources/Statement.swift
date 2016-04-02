@@ -6,20 +6,31 @@
 //  Copyright © 2015 Robocat. All rights reserved.
 //
 
+/// A SQL operation
 public enum Operation {
+	/// Read the specified columns from rows in a table
 	case Select([Column])
+	/// Insert a new row with the specified value for each column
 	case Insert([(Column, SqlValue)])
+	/// Update a row with the specified value for each updated column
 	case Update([(Column, SqlValue)])
+	/// Count rows
 	case Count
+	/// Delete rows
 	case Delete
 }
 
+/// What to do in case of conflict
 public enum OnConflict {
+	/// Abort the operation and fail with an error
 	case Abort
+	/// Ignore the operation
 	case Ignore
+	/// Perform the operation anyway
 	case Replace
 }
 
+/// A single result, which might not exist (really just an optional)
 public enum SingleResult<T> {
 	case NoResult
 	case Result(T)
@@ -32,6 +43,9 @@ public enum SingleResult<T> {
 	}
 }
 
+/// A statement that can be run against a database
+/// T: The table to run the statement on
+/// Return: The return type
 public struct Statement<T : Sqlable, Return> {
 	let operation : Operation
 	let filterBy : Expression?
@@ -40,6 +54,7 @@ public struct Statement<T : Sqlable, Return> {
 	let single : Bool
 	let onConflict : OnConflict
 	
+	/// Create a statement for a certain operation
 	public init(operation : Operation) {
 		self.operation = operation
 		self.filterBy = nil
@@ -58,25 +73,35 @@ public struct Statement<T : Sqlable, Return> {
 		self.onConflict = onConflict
 	}
 	
+	/// Add an expression filter to the statement
+	@warn_unused_result
 	public func filter(expression : Expression) -> Statement {
 		guard filterBy == nil else { fatalError("You can only add one filter to an expression. Combine filters with &&") }
 		
 		return Statement(operation: operation, filter: expression, orderBy: orderBy, limit: limit, single: single, onConflict: onConflict)
 	}
 	
+	/// Add an ordering to the statement
+	@warn_unused_result
 	public func orderBy(column : Column, _ direction : Order.Direction = .Asc) -> Statement {
 		let order = Order(column, direction)
 		return Statement(operation: operation, filter: filterBy, orderBy: orderBy + [order], limit: limit, single: single, onConflict: onConflict)
 	}
 	
+	/// Add a row return limit to the statement
+	@warn_unused_result
 	public func limit(limit : Int) -> Statement {
 		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: single, onConflict: onConflict)
 	}
 	
+	/// Only select a single row
+	@warn_unused_result
 	public func singleResult() -> Statement {
 		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: true, onConflict: onConflict)
 	}
 	
+	/// Ignore the operation if there are any conflicts caused by the statement
+	@warn_unused_result
 	public func ignoreOnConflict() -> Statement {
 		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: single, onConflict: .Ignore)
 	}
@@ -141,20 +166,30 @@ public struct Statement<T : Sqlable, Return> {
 		return values
 	}
 	
+	/// Run the statement against a database instance
 	public func run(db : SqliteDatabase) throws -> Return {
 		return try db.run(self) as! Return
 	}
 }
 
+/// Ordering of selected rows
 public struct Order : SqlPrintable {
+	/// Ordering direction
 	public enum Direction {
+		/// Order ascending
 		case Asc
+		/// Order descending
 		case Desc
 	}
 	
 	let column : Column
 	let direction : Direction
 	
+	/// Create an ordering
+	/// 
+	///	- Parameters:
+	///		- column: The column to order by
+	///		- direction: The direction to order in
 	public init(_ column : Column, _ direction : Direction) {
 		self.column = column
 		self.direction = direction
