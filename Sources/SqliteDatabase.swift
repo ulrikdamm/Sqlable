@@ -7,7 +7,7 @@
 //
 
 /// Errors to occur when running SQL commands.
-public enum SqlError : ErrorType {
+public enum SqlError : ErrorProtocol {
 	/// Error when data returned from the database didn't match the defined data types.
 	case ReadError(String)
 	
@@ -30,7 +30,7 @@ public protocol SqlPrintable {
 
 /// Class for managing a single database connection.
 public class SqliteDatabase {
-	let db : COpaquePointer!
+	let db : OpaquePointer!
 	let filepath : String
 	
 	var parent : SqliteDatabase?
@@ -43,8 +43,8 @@ public class SqliteDatabase {
 	/// Enables or disables print debugging. Will print out all SQL statements executed, and all results returned.
 	public var debug = false
 	
-	static let SQLITE_STATIC = unsafeBitCast(0, sqlite3_destructor_type.self)
-	static let SQLITE_TRANSIENT = unsafeBitCast(-1, sqlite3_destructor_type.self)
+	static let SQLITE_STATIC = unsafeBitCast(0, to: sqlite3_destructor_type.self)
+	static let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 	
 	var transactionLevel = 0
 	
@@ -83,7 +83,7 @@ public class SqliteDatabase {
 		try execute("pragma journal_mode = WAL")
 		try execute("pragma busy_timeout = 1000000")
 		
-		sqlite3_update_hook(db, onUpdate, unsafeBitCast(self, UnsafeMutablePointer<Void>.self))
+		sqlite3_update_hook(db, onUpdate, unsafeBitCast(self, to: UnsafeMutablePointer<Void>.self))
 	}
 	
 	
@@ -93,9 +93,9 @@ public class SqliteDatabase {
 	///		- filePath: The path of the database file
 	/// - Throws: Eventual errors from `NSFileManager`
 	public static func deleteDatabase(at filepath : String) throws {
-		try NSFileManager.defaultManager().removeItemAtPath(filepath)
-		try NSFileManager.defaultManager().removeItemAtPath(filepath + "-shm")
-		try NSFileManager.defaultManager().removeItemAtPath(filepath + "-wal")
+		try NSFileManager.defaultManager().removeItem(atPath: filepath)
+		try NSFileManager.defaultManager().removeItem(atPath: filepath + "-shm")
+		try NSFileManager.defaultManager().removeItem(atPath: filepath + "-wal")
 	}
 	
 	/// Begin observing a change in the database.
@@ -109,7 +109,7 @@ public class SqliteDatabase {
 	///			- id: The id of the inserted/updated/deleted object.
 	///	- Returns: A string handle you can use for removing the observer if you don't need it anymore.
 	public func observe<T : Sqlable>(change : Change? = nil, on : T.Type, id : Int? = nil, doThis : (id : Int) throws -> Void) -> String {
-		let handlerId = NSUUID().UUIDString
+		let handlerId = NSUUID().uuidString
 		eventHandlers[handlerId] = (change, on.tableName, id, doThis)
 		
 		return handlerId
@@ -120,11 +120,11 @@ public class SqliteDatabase {
 	/// Parameters:
 	///		- id: The handle returned from `observe(change:on:id:doThis:)`
 	public func removeObserver(id : String) {
-		eventHandlers.removeValueForKey(id)
+		eventHandlers.removeValue(forKey: id)
 	}
 	
-	static func openDatabase(filepath : String) throws -> COpaquePointer {
-		var db : COpaquePointer = nil
+	static func openDatabase(filepath : String) throws -> OpaquePointer {
+		var db : OpaquePointer = nil
 		
 		let result = sqlite3_open(filepath, &db)
 		if result != SQLITE_OK {
@@ -154,7 +154,7 @@ public class SqliteDatabase {
 	///
 	/// Parameters:
 	///		- error: The error to notify of. Should probably be a SqlError, but any error will also work.
-	public func fail(error : ErrorType) {
+	public func fail(error : ErrorProtocol) {
 		let message : String
 		
 		if let error = error as? SqlError {
@@ -208,10 +208,10 @@ public class SqliteDatabase {
 	///		- statement: The SQL command to run.
 	/// - Throws: SqlError if any errors happened running the command.
 	public func execute(statement : String) throws {
-		let sql = statement.cStringUsingEncoding(NSUTF8StringEncoding)!
+		let sql = statement.cString(usingEncoding: NSUTF8StringEncoding)!
 		
 		if debug {
-			let indentation = (0..<transactionLevel).map { _ in "  " }.joinWithSeparator("")
+			let indentation = (0..<transactionLevel).map { _ in "  " }.joined(separator: "")
 			print("\(indentation)SQL: \(statement)")
 		}
 		
@@ -315,14 +315,14 @@ public class SqliteDatabase {
 	}
 	
 	func run<T : Sqlable, Return>(statement : Statement<T, Return>) throws -> Any {
-		guard let sql = statement.sqlDescription.cStringUsingEncoding(NSUTF8StringEncoding) else { fatalError("Invalid SQL") }
+		guard let sql = statement.sqlDescription.cString(usingEncoding: NSUTF8StringEncoding) else { fatalError("Invalid SQL") }
 		
 		if debug {
-			let indentation = (0..<transactionLevel).map { _ in "  " }.joinWithSeparator("")
+			let indentation = (0..<transactionLevel).map { _ in "  " }.joined(separator: "")
 			print("\(indentation)SQL: \(statement.sqlDescription) \(statement.values)")
 		}
 		
-		var handle : COpaquePointer = nil
+		var handle : OpaquePointer = nil
 		if sqlite3_prepare_v2(db, sql, -1, &handle, nil) != SQLITE_OK {
 			try throwLastError(db)
 		}
@@ -400,7 +400,7 @@ public class SqliteDatabase {
 		if debug {
 			switch statement.operation {
 			case .Count, .Select:
-				let indentation = (0..<transactionLevel).map { _ in "  " }.joinWithSeparator("")
+				let indentation = (0..<transactionLevel).map { _ in "  " }.joined(separator: "")
 				print("\(indentation)SQL result: \(returnValue)")
 			case _: break
 			}
@@ -413,16 +413,16 @@ public class SqliteDatabase {
 		return returnValue
 	}
 	
-	private func bindValues(db : COpaquePointer, handle : COpaquePointer, values : [SqlValue], from : Int) throws {
-		for (i, value) in values.enumerate().map({ i, value in (Int32(i + from), value) }) {
+	private func bindValues(db : OpaquePointer, handle : OpaquePointer, values : [SqlValue], from : Int) throws {
+		for (i, value) in values.enumerated().map({ i, value in (Int32(i + from), value) }) {
 			try value.bind(db, handle: handle, index: i)
 		}
 	}
 }
 
-func throwLastError(db : COpaquePointer) throws {
+func throwLastError(db : OpaquePointer) throws {
 	let errorCode = Int(sqlite3_errcode(db))
-	let reason = String.fromCString(sqlite3_errmsg(db))
+	let reason = String(validatingUTF8: sqlite3_errmsg(db))
 	let extendedError = Int(sqlite3_extended_errcode(db))
 	
 	print("SQL ERROR \(errorCode) (\(extendedError)): \(reason ?? "Unknown error")")
@@ -441,7 +441,7 @@ private func sqlErrorForCode(code : Int) -> SqlError {
 }
 
 private func onUpdate(thisPointer : UnsafeMutablePointer<Void>, changeRaw : Int32, database : UnsafePointer<Int8>, tableNameRaw : UnsafePointer<Int8>, rowid : sqlite3_int64) {
-	let this = unsafeBitCast(thisPointer, SqliteDatabase.self)
+	let this = unsafeBitCast(thisPointer, to: SqliteDatabase.self)
 	
 	let change : SqliteDatabase.Change
 	
@@ -452,7 +452,7 @@ private func onUpdate(thisPointer : UnsafeMutablePointer<Void>, changeRaw : Int3
 	case _: return
 	}
 	
-	let tableName = String.fromCString(UnsafePointer<Int8>(tableNameRaw))!
+	let tableName = String(validatingUTF8: UnsafePointer<Int8>(tableNameRaw))!
 	
 	let update = (change, tableName, Int(rowid))
 	

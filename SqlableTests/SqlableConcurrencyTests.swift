@@ -81,7 +81,7 @@ class SqliteConcurrencyTests : XCTestCase {
 			try! TestTable(id: nil, value1: 1, value2: "background").insert().run(child)
 		}
 		
-		NSRunLoop.mainRunLoop().runUntilDate(NSDate().dateByAddingTimeInterval(1))
+		NSRunLoop.main().run(until: NSDate().addingTimeInterval(1))
 		
 		XCTAssert(didCall)
 	}
@@ -117,7 +117,7 @@ class SqliteConcurrencyTests : XCTestCase {
 		
 		try! db.rollbackTransaction()
 		
-		NSRunLoop.mainRunLoop().runUntilDate(NSDate().dateByAddingTimeInterval(1))
+		NSRunLoop.main().run(until: NSDate().addingTimeInterval(1))
 		
 		XCTAssert(didCallUpdate)
 		XCTAssert(try! TestTable.read().run(db).count == 1)

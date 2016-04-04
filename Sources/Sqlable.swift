@@ -33,7 +33,7 @@ public struct Unique : TableConstraint {
 	
 	/// Get the SQL description of the unique constraint.
 	public var sqlDescription : String {
-		let columnList = columns.map { $0.name }.joinWithSeparator(", ")
+		let columnList = columns.map { $0.name }.joined(separator: ", ")
 		return "unique (\(columnList)) on conflict abort"
 	}
 }
@@ -70,8 +70,8 @@ public extension Sqlable {
 	static var tableName : String {
 		let typeName = "table_\(Mirror(reflecting: self).subjectType)"
 		return typeName
-			.substringToIndex(typeName.endIndex.advancedBy(-5))
-			.lowercaseString
+			.substring(to: typeName.endIndex.advanced(by: -5))
+			.lowercased()
 	}
 	
 	static var tableConstraints : [TableConstraint] {
@@ -84,7 +84,7 @@ public extension Sqlable {
 	static func createTable() -> String {
 		let columns = tableLayout.map { $0.sqlDescription }
 		let constraints = tableConstraints.map { $0.sqlDescription }
-		let fields = (columns + constraints).joinWithSeparator(", ")
+		let fields = (columns + constraints).joined(separator: ", ")
 		return "create table if not exists \(tableName) (\(fields))"
 	}
 	

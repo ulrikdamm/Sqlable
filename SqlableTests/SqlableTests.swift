@@ -10,7 +10,7 @@ import XCTest
 @testable import Sqlable
 
 func documentsPath() -> String {
-	return NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first!
+	return NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
 }
 
 struct User {

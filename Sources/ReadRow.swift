@@ -10,19 +10,19 @@ import Foundation
 
 /// A row returned from the SQL database, from which you can read column values
 public struct ReadRow<T : Sqlable> {
-	private let handle : COpaquePointer
+	private let handle : OpaquePointer
 	let type = T.self
 	
 	let columnIndex : [String: Int]
 	
 	/// Create a read row from a SQLite handle
-	public init(handle : COpaquePointer) {
+	public init(handle : OpaquePointer) {
 		self.handle = handle
 		
 		var columnIndex : [String: Int] = [:]
 		
 		for i in (0..<sqlite3_column_count(handle)) {
-			let name = String.fromCString(sqlite3_column_name(handle, i))!
+			let name = String(validatingUTF8: sqlite3_column_name(handle, i))!
 			columnIndex[name] = Int(i)
 		}
 		
@@ -56,7 +56,7 @@ public struct ReadRow<T : Sqlable> {
 	/// - Returns: The string value for that column in the current row
 	public func get(column : Column) throws -> String {
 		let index = try columnIndex(column)
-		return String.fromCString(UnsafePointer<Int8>(sqlite3_column_text(handle, index)))!
+		return String(validatingUTF8: UnsafePointer<CChar>(sqlite3_column_text(handle, index)))!
 	}
 	
 	/// Read a date value for a column

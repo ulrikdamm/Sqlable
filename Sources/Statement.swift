@@ -118,14 +118,14 @@ public struct Statement<T : Sqlable, Return> {
 		
 		switch operation {
 		case .Select(let columns):
-			let columnNames = columns.map { $0.name }.joinWithSeparator(", ")
+			let columnNames = columns.map { $0.name }.joined(separator: ", ")
 			sql = ["select \(columnNames) from \(T.tableName)"]
 		case .Insert(let ops):
-			let columnNames = ops.map { column, value in column.name }.joinWithSeparator(", ")
-			let values = ops.map { _ in "?" }.joinWithSeparator(", ")
+			let columnNames = ops.map { column, value in column.name }.joined(separator: ", ")
+			let values = ops.map { _ in "?" }.joined(separator: ", ")
 			sql = ["insert \(conflict) into \(T.tableName) (\(columnNames)) values (\(values))"]
 		case .Update(let ops):
-			let values = ops.map { column, _ in "\(column.name) = ?" }.joinWithSeparator(", ")
+			let values = ops.map { column, _ in "\(column.name) = ?" }.joined(separator: ", ")
 			sql = ["update \(conflict) \(T.tableName) set \(values)"]
 		case .Count:
 			sql = ["select count(*) from \(T.tableName)"]
@@ -138,14 +138,14 @@ public struct Statement<T : Sqlable, Return> {
 		}
 		
 		if orderBy.count > 0 {
-			sql.append("order by " + orderBy.map { $0.sqlDescription }.joinWithSeparator(", "))
+			sql.append("order by " + orderBy.map { $0.sqlDescription }.joined(separator: ", "))
 		}
 		
 		if let limit = limit {
 			sql.append("limit \(limit)")
 		}
 		
-		return sql.joinWithSeparator(" ")
+		return sql.joined(separator: " ")
 	}
 	
 	var values : [SqlValue] {

@@ -31,7 +31,7 @@ public struct PrimaryKey : ColumnOption {
 			sql.append("autoincrement")
 		}
 		
-		return sql.joinWithSeparator(" ")
+		return sql.joined(separator: " ")
 	}
 }
 
@@ -88,7 +88,7 @@ public struct ForeignKey<To : Sqlable> : ColumnOption, SqlPrintable {
 			sql.append("on delete \(onDelete.sqlDescription)")
 		}
 		
-		return sql.joinWithSeparator(" ")
+		return sql.joined(separator: " ")
 	}
 }
 
@@ -156,6 +156,6 @@ extension Column : SqlPrintable {
 			statement.append(option.sqlDescription)
 		}
 		
-		return statement.joinWithSeparator(" ")
+		return statement.joined(separator: " ")
 	}
 }

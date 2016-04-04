@@ -72,10 +72,10 @@ public indirect enum Expression : SqlPrintable {
 		case .EqualsValue(let column, is Null): return "\(column.expressionName) is null"
 		case .EqualsValue(let column, _): return "\(column.expressionName) == ?"
 		case .In(let column, let values):
-			let placeholders = values.map { _ in "?" }.joinWithSeparator(", ")
+			let placeholders = values.map { _ in "?" }.joined(separator: ", ")
 			return "\(column.expressionName) in (\(placeholders))"
 		case .Function(let name, let operands):
-			let placeholders = operands.map { $0.sqlDescription }.joinWithSeparator(", ")
+			let placeholders = operands.map { $0.sqlDescription }.joined(separator: ", ")
 			return "\(name)(\(placeholders))"
 		}
 	}
