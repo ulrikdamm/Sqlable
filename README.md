@@ -110,10 +110,10 @@ let child = try db.createChild()
 
 dispatch_async(background_queue) {
 	let bicycles = try! Bicycle.read().run(child)
-  
-  dispatch_async(main_queue) {
-    self.displayData(bicycles)
-  }
+	
+	dispatch_async(main_queue) {
+		self.displayData(bicycles)
+	}
 }
 ```
 
@@ -126,6 +126,7 @@ All public functions now have documentation 😎
 ## New in 1.1 (+1.1.1)
 
 • Nested transactions
+
 • SQL function calling for filters (e.g. "like", "upper" and "lower")
 
 ## What other cool features does it have?
