@@ -85,6 +85,49 @@ try bike.update().run(db)
 try bike.delete().run(db)
 ```
 
+## New in version 1.2
+
+### Update callbacks
+
+You can now very easily observe changes via update callbacks on inserts, deletes and updates.
+
+```swift
+db.observe(.Insert, on: Bicycle.self) { id in
+	print("Inserted bicycle \(id)")
+}
+
+db.observe(.Update, on: Bicycle.self, id: 2) { id in
+	print("bicycle 2 has been updated")
+}
+```
+
+### Concurrency
+
+Sqlable now uses SQLites write-ahead log, which makes concurrent operations fast and easy. And since Sqlable is operating with plain structs, you can freely pass information between different threads.
+
+```swift
+let child = try db.createChild()
+
+dispatch_async(background_queue) {
+	let bicycles = try! Bicycle.read().run(child)
+  
+  dispatch_async(main_queue) {
+    self.displayData(bicycles)
+  }
+}
+```
+
+You can use transactions to lock the database, and other threads will wait until the transaction is done.
+
+### Full documentation
+
+All public functions now have documentation 😎
+
+## New in 1.1 (+1.1.1)
+
+• Nested transactions
+• SQL function calling for filters (e.g. "like", "upper" and "lower")
+
 ## What other cool features does it have?
 
 ### Transactions
