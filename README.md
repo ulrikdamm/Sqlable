@@ -175,7 +175,7 @@ db.didUpdate = { table, id, change in
 	switch change {
 	case .Insert: print("Inserted \(id) into \(table)")
 	case .Update: print("Updated \(id) in \(table)")
-	caes .Delete: print("Deleted \(id) from \(table)")
+	case .Delete: print("Deleted \(id) from \(table)")
 	}
 }
 ```
@@ -184,15 +184,15 @@ But even better, you can register event callbacks on specific actions, tables an
 
 ```swift
 db.observe(.Insert, on: Bicycle.self) { id in
-	print("Inserted bicykle \(id)")
+	print("Inserted bicycle \(id)")
 }
 
 db.observe(.Update, on: Bicycle.self, id: 2) { id in
-	print("Bicykle 2 has been updated")
+	print("bicycle 2 has been updated")
 }
 
 db.observe(.Delete, on: Bicycle.self) { id in
-	print("Bicykle \(id) has been deleted")
+	print("bicycle \(id) has been deleted")
 }
 
 db.observe(on: Bicycle.self) { id in
