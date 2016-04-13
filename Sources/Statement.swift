@@ -41,6 +41,17 @@ public enum SingleResult<T> {
 		case .NoResult: return nil
 		}
 	}
+	
+	public var hasResult : Bool {
+		switch self {
+		case .NoResult: return false
+		case _: return true
+		}
+	}
+}
+
+public func ==<T : Equatable>(lhs : SingleResult<T>, rhs : SingleResult<T>) -> Bool {
+	return lhs.value == rhs.value
 }
 
 /// A statement that can be run against a database
