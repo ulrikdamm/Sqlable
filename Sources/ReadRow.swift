@@ -9,15 +9,16 @@
 import Foundation
 
 /// A row returned from the SQL database, from which you can read column values
-public struct ReadRow<T : Sqlable> {
+public struct ReadRow {
 	private let handle : COpaquePointer
-	let type = T.self
+	private let tablename : String
 	
 	let columnIndex : [String: Int]
 	
 	/// Create a read row from a SQLite handle
-	public init(handle : COpaquePointer) {
+	public init(handle : COpaquePointer, tablename : String) {
 		self.handle = handle
+		self.tablename = tablename
 		
 		var columnIndex : [String: Int] = [:]
 		
@@ -156,7 +157,7 @@ public struct ReadRow<T : Sqlable> {
 	
 	private func columnIndex(column : Column) throws -> Int32 {
 		guard let index = columnIndex[column.name] else {
-			throw SqlError.ReadError("Column \"\(column.name)\" not found on \(type)")
+			throw SqlError.ReadError("Column \"\(column.name)\" not found on \(tablename)")
 		}
 		
 		return Int32(index)

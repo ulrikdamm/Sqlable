@@ -375,7 +375,7 @@ public class SqliteDatabase {
 			loop: while true {
 				switch sqlite3_step(handle) {
 				case SQLITE_ROW:
-					rows.append(try T(row: ReadRow<T>(handle: handle)))
+					rows.append(try T(row: ReadRow(handle: handle, tablename: T.tableName)))
 					continue
 				case SQLITE_DONE: break loop
 				case SQLITE_BUSY:
