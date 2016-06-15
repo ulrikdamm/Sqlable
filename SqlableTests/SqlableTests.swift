@@ -25,14 +25,14 @@ struct Group {
 }
 
 extension Group : Sqlable {
-	static let id = Column("id", .Integer, PrimaryKey(autoincrement: true))
+	static let id = Column("id", .integer, PrimaryKey(autoincrement: true))
 	static let tableLayout = [id]
 	
 	init(row : ReadRow<Group>) throws {
 		id = try row.get(Group.id)
 	}
 	
-	func valueForColumn(column : Column) -> SqlValue? {
+	func valueForColumn(_ column : Column) -> SqlValue? {
 		switch column {
 		case Group.id: return id
 		case _: return nil
@@ -41,10 +41,10 @@ extension Group : Sqlable {
 }
 
 extension User : Sqlable {
-	static let id = Column("id", .Integer, PrimaryKey(autoincrement: true))
-	static let name = Column("name", .Text)
-	static let avatarURL = Column("avatar_url", .Nullable(.Text))
-	static let groupId = Column("group_id", .Integer, ForeignKey<Group>())
+	static let id = Column("id", .integer, PrimaryKey(autoincrement: true))
+	static let name = Column("name", .text)
+	static let avatarURL = Column("avatar_url", .nullable(.text))
+	static let groupId = Column("group_id", .integer, ForeignKey<Group>())
 	static let tableLayout = [id, name, avatarURL, groupId]
 	
 	init(row : ReadRow<User>) throws {
@@ -54,7 +54,7 @@ extension User : Sqlable {
 		groupId = try row.get(User.groupId)
 	}
 	
-	func valueForColumn(column : Column) -> SqlValue? {
+	func valueForColumn(_ column : Column) -> SqlValue? {
 		switch column {
 		case User.id: return id
 		case User.name: return name
@@ -201,7 +201,7 @@ class SqliteDatabaseTests: XCTestCase {
 		try! user1.insert().run(db)
 		try! user2.insert().run(db)
 		
-		let users = try! User.read().orderBy(User.name, .Desc).limit(1).run(db)
+		let users = try! User.read().orderBy(User.name, .desc).limit(1).run(db)
 		XCTAssert(users.count == 1)
 		
 		XCTAssert(users[0].id == 1)

@@ -56,7 +56,7 @@ public protocol Sqlable {
 	///	- Returns: A SqlValue to insert into the row.
 	///		For null, return a Null().
 	///		When returning nil, the column will be omitted completely, and will need to have a default value.
-	func valueForColumn(column : Column) -> SqlValue?
+	func valueForColumn(_ column : Column) -> SqlValue?
 	
 	/// Reads a row from the Sqlite database.
 	///
@@ -70,7 +70,7 @@ public extension Sqlable {
 	static var tableName : String {
 		let typeName = "table_\(Mirror(reflecting: self).subjectType)"
 		return typeName
-			.substring(to: typeName.endIndex.advanced(by: -5))
+			.substring(to: typeName.index(typeName.endIndex, offsetBy: -5))
 			.lowercased()
 	}
 	
@@ -93,7 +93,7 @@ public extension Sqlable {
 	/// - Parameters:
 	///		- name: The name of the column
 	///	- Returns: The found column, or nil if none found.
-	static func columnForName(name : String) -> Column? {
+	static func columnForName(_ name : String) -> Column? {
 		return Self.tableLayout.lazy.filter { column in column.name == name }.first
 	}
 	
@@ -116,7 +116,7 @@ public extension Sqlable {
 		guard let primaryColumn = Self.primaryColumn() else { fatalError("\(self) doesn't have a primary key") }
 		guard let primaryValue = valueForColumn(primaryColumn) else { fatalError("\(self) doesn't have a primary key value") }
 		let values = Self.tableLayout.flatMap { column in valueForColumn(column).flatMap { (column, $0) } }
-		return Statement(operation: .Update(values)).filter(primaryColumn == primaryValue)
+		return Statement(operation: .update(values)).filter(primaryColumn == primaryValue)
 	}
 	
 	/// Create an insert statement, which can be run against a database.
@@ -126,7 +126,7 @@ public extension Sqlable {
 	@warn_unused_result
 	func insert() -> Statement<Self, Int> {
 		let values = Self.tableLayout.flatMap { column in valueForColumn(column).flatMap { (column, $0) } }
-		return Statement(operation: .Insert(values))
+		return Statement(operation: .insert(values))
 	}
 	
 	/// Create a delete statement, which can be run against a database.
@@ -140,7 +140,7 @@ public extension Sqlable {
 	func delete() -> Statement<Self, Void> {
 		guard let primaryColumn = Self.primaryColumn() else { fatalError("\(self) doesn't have a primary key") }
 		guard let primaryValue = valueForColumn(primaryColumn) else { fatalError("\(self) doesn't have a primary key value") }
-		return Statement(operation: .Delete).filter(primaryColumn == primaryValue)
+		return Statement(operation: .delete).filter(primaryColumn == primaryValue)
 	}
 	
 	/// Create a count statement, which can be run against a database.
@@ -149,7 +149,7 @@ public extension Sqlable {
 	/// - Returns: A count statement instance.
 	@warn_unused_result
 	static func count() -> Statement<Self, Int> {
-		return Statement(operation: .Count)
+		return Statement(operation: .count)
 	}
 	
 	/// Create a delete statement, which can be run against a database.
@@ -159,8 +159,8 @@ public extension Sqlable {
 	///		- filter: A filter on which objects should be deleted.
 	/// - Returns: A count statement instance.
 	@warn_unused_result
-	static func delete(filter : Expression) -> Statement<Self, Void> {
-		return Statement(operation: .Delete).filter(filter)
+	static func delete(_ filter : Expression) -> Statement<Self, Void> {
+		return Statement(operation: .delete).filter(filter)
 	}
 	
 	/// Create a read statement, which can be run against a database.
@@ -169,7 +169,7 @@ public extension Sqlable {
 	/// - Returns: A read statement instance.
 	@warn_unused_result
 	static func read() -> Statement<Self, [Self]> {
-		return Statement(operation: .Select(Self.tableLayout))
+		return Statement(operation: .select(Self.tableLayout))
 	}
 	
 	/// Will create a read statement, which can be run against a database.
@@ -179,9 +179,9 @@ public extension Sqlable {
 	///		- self needs to have a value for its primary key
 	/// - Returns: A read statement instance.
 	@warn_unused_result
-	static func byId(id : SqlValue) -> Statement<Self, SingleResult<Self>> {
+	static func byId(_ id : SqlValue) -> Statement<Self, SingleResult<Self>> {
 		guard let primary = primaryColumn() else { fatalError("\(self.dynamicType) have no primary key") }
-		return Statement(operation: .Select(Self.tableLayout))
+		return Statement(operation: .select(Self.tableLayout))
 			.filter(primary == id)
 			.limit(1)
 			.singleResult()

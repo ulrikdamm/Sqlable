@@ -38,20 +38,20 @@ public struct PrimaryKey : ColumnOption {
 /// Rules for handling updates or deletions
 public enum Rule : SqlPrintable {
 	/// Ignore the update or deletion
-	case Ignore
+	case ignore
 	/// Perform a cascading delete
-	case Cascade
+	case cascade
 	/// Set the updated or deleted reference to null
-	case SetNull
+	case setNull
 	/// Set the updated or deleted reference to the default value
-	case SetDefault
+	case setDefault
 	
 	public var sqlDescription : String {
 		switch self {
-		case .Ignore: return "no action"
-		case .Cascade: return "cascade"
-		case .SetNull: return "set null"
-		case .SetDefault: return "set default"
+		case .ignore: return "no action"
+		case .cascade: return "cascade"
+		case .setNull: return "set null"
+		case .setDefault: return "set default"
 		}
 	}
 }
@@ -71,7 +71,7 @@ public struct ForeignKey<To : Sqlable> : ColumnOption, SqlPrintable {
 	///		- column: The column in the other Sqlable to reference for identification (default is the 'id' column)
 	///		- onDelete: What to do when the referenced row is deleted (default is ignore)
 	///		- onUpdate: What to do when the referenced row is updated (default is ignore)
-	public init(column : Column = Column("id", .Integer), onDelete : Rule = .Ignore, onUpdate : Rule = .Ignore) {
+	public init(column : Column = Column("id", .integer), onDelete : Rule = .ignore, onUpdate : Rule = .ignore) {
 		self.column = column
 		self.onDelete = onDelete
 		self.onUpdate = onUpdate
@@ -80,11 +80,11 @@ public struct ForeignKey<To : Sqlable> : ColumnOption, SqlPrintable {
 	public var sqlDescription : String {
 		var sql = ["references \(To.tableName)(\(column.name))"]
 		
-		if onUpdate != .Ignore {
+		if onUpdate != .ignore {
 			sql.append("on update \(onUpdate.sqlDescription)")
 		}
 		
-		if onDelete != .Ignore {
+		if onDelete != .ignore {
 			sql.append("on delete \(onDelete.sqlDescription)")
 		}
 		

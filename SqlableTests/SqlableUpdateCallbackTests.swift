@@ -110,7 +110,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		db.didUpdate = { table, row, change in
 			XCTAssert(table == TestTable.tableName)
 			XCTAssert(row == 2)
-			XCTAssert(change == .Insert)
+			XCTAssert(change == .insert)
 			didCall = true
 		}
 		
@@ -127,7 +127,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		db.didUpdate = { table, row, change in
 			XCTAssert(table == TestTable.tableName)
 			XCTAssert(row == 2)
-			XCTAssert(change == .Update)
+			XCTAssert(change == .update)
 			didCall = true
 		}
 		
@@ -144,7 +144,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		db.didUpdate = { table, row, change in
 			XCTAssert(table == TestTable.tableName)
 			XCTAssert(row == 2)
-			XCTAssert(change == .Delete)
+			XCTAssert(change == .delete)
 			didCall = true
 		}
 		
@@ -156,7 +156,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 	func testEventHandlerInsert() {
 		var didCall = false
 		
-		db.observe(.Insert, on: TestTable.self) { _ in
+		db.observe(.insert, on: TestTable.self) { _ in
 			didCall = true
 		}
 		
@@ -170,7 +170,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		
 		try! TestTable(id: 2, value1: 1, value2: "").insert().run(db)
 		
-		db.observe(.Update, on: TestTable.self) { id in
+		db.observe(.update, on: TestTable.self) { id in
 			XCTAssert(didCall == false)
 			XCTAssert(id == 2)
 			didCall = true
@@ -188,7 +188,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		try! TestTable(id: 2, value1: 1, value2: "").insert().run(db)
 		try! TestTable(id: 3, value1: 1, value2: "").insert().run(db)
 		
-		db.observe(.Update, on: TestTable.self, id: 2) { id in
+		db.observe(.update, on: TestTable.self, id: 2) { id in
 			XCTAssert(didCall == false)
 			XCTAssert(id == 2)
 			didCall = true
@@ -205,7 +205,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		
 		try! TestTable(id: 2, value1: 1, value2: "").insert().run(db)
 		
-		db.observe(.Delete, on: TestTable.self) { id in
+		db.observe(.delete, on: TestTable.self) { id in
 			XCTAssert(didCall == false)
 			XCTAssert(id == 2)
 			didCall = true
@@ -223,7 +223,7 @@ class SqliteUpdateCallbackTests : XCTestCase {
 		try! TestTable(id: 2, value1: 1, value2: "").insert().run(db)
 		try! TestTable(id: 3, value1: 1, value2: "").insert().run(db)
 		
-		db.observe(.Delete, on: TestTable.self, id: 2) { id in
+		db.observe(.delete, on: TestTable.self, id: 2) { id in
 			XCTAssert(didCall == false)
 			XCTAssert(id == 2)
 			didCall = true
@@ -239,12 +239,12 @@ class SqliteUpdateCallbackTests : XCTestCase {
 	func testMultipleEventHandlers() {
 		var didCall = 0
 		
-		db.observe(.Insert, on: TestTable.self, id: 1) { id in
+		db.observe(.insert, on: TestTable.self, id: 1) { id in
 			XCTAssert(id == 1)
 			didCall += 1
 		}
 		
-		db.observe(.Insert, on: TestTable.self, id: 2) { id in
+		db.observe(.insert, on: TestTable.self, id: 2) { id in
 			XCTAssert(id == 2)
 			didCall += 1
 		}

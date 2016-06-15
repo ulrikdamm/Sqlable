@@ -12,7 +12,7 @@ import XCTest
 class SqliteConcurrencyTests : XCTestCase {
 	let path = documentsPath() + "/test.sqlite"
 	var db : SqliteDatabase!
-	let background = dispatch_get_global_queue(0, 0)
+	let background = DispatchQueue.global(attributes: DispatchQueue.GlobalAttributes(rawValue: UInt64(0)))
 	
 	override func setUp() {
 		_ = try? SqliteDatabase.deleteDatabase(at: path)
@@ -32,14 +32,14 @@ class SqliteConcurrencyTests : XCTestCase {
 	func testBackgroundedChild() {
 		let child = try! db.createChild()
 		
-		let lock = dispatch_semaphore_create(0)
+		let lock = DispatchSemaphore(value: 0)
 		
-		dispatch_async(background) {
+		background.async {
 			try! TestTable(id: nil, value1: 1, value2: "Hi!").insert().run(child)
-			dispatch_semaphore_signal(lock)
+			lock.signal()
 		}
 		
-		dispatch_semaphore_wait(lock, DISPATCH_TIME_FOREVER)
+		lock.wait(timeout: DispatchTime.distantFuture)
 		
 		XCTAssert(try! TestTable.read().run(child).count == 1)
 		XCTAssert(try! TestTable.read().run(db).count == 1)
@@ -48,21 +48,21 @@ class SqliteConcurrencyTests : XCTestCase {
 	func testConcurrentChild() {
 		let child = try! db.createChild()
 		
-		let lock = dispatch_semaphore_create(0)
+		let lock = DispatchSemaphore(value: 0)
 		
-		dispatch_async(background) {
+		background.async {
 			for i in (0..<100) {
 				try! TestTable(id: nil, value1: i, value2: "background").insert().run(child)
 			}
 			
-			dispatch_semaphore_signal(lock)
+			lock.signal()
 		}
 		
 		for i in (0..<100) {
 			try! TestTable(id: nil, value1: i, value2: "foreground").insert().run(db)
 		}
 		
-		dispatch_semaphore_wait(lock, DISPATCH_TIME_FOREVER)
+		lock.wait(timeout: DispatchTime.distantFuture)
 		
 		XCTAssert(try! TestTable.read().run(child).count == 200)
 		XCTAssert(try! TestTable.read().run(db).count == 200)
@@ -73,15 +73,15 @@ class SqliteConcurrencyTests : XCTestCase {
 		
 		var didCall = false
 		
-		db.observe(.Insert, on: TestTable.self) { _ in
+		db.observe(.insert, on: TestTable.self) { _ in
 			didCall = true
 		}
 		
-		dispatch_async(background) {
+		background.async {
 			try! TestTable(id: nil, value1: 1, value2: "background").insert().run(child)
 		}
 		
-		NSRunLoop.main().run(until: NSDate().addingTimeInterval(1))
+		RunLoop.main().run(until: Date().addingTimeInterval(1))
 		
 		XCTAssert(didCall)
 	}
@@ -92,7 +92,7 @@ class SqliteConcurrencyTests : XCTestCase {
 		var didCallUpdate = false
 		var didCallBackground = false
 		
-		db.observe(.Insert, on: TestTable.self) { id in
+		db.observe(.insert, on: TestTable.self) { id in
 			XCTAssert(id == 3)
 			didCallUpdate = true
 		}
@@ -101,7 +101,7 @@ class SqliteConcurrencyTests : XCTestCase {
 		
 		try! TestTable(id: 1, value1: 1, value2: "foreground").insert().run(db)
 		
-		dispatch_async(background) {
+		background.async {
 			didCallBackground = true
 			
 			try! child.transaction { child in
@@ -117,7 +117,7 @@ class SqliteConcurrencyTests : XCTestCase {
 		
 		try! db.rollbackTransaction()
 		
-		NSRunLoop.main().run(until: NSDate().addingTimeInterval(1))
+		RunLoop.main().run(until: Date().addingTimeInterval(1))
 		
 		XCTAssert(didCallUpdate)
 		XCTAssert(try! TestTable.read().run(db).count == 1)

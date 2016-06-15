@@ -9,36 +9,36 @@
 /// A SQL operation
 public enum Operation {
 	/// Read the specified columns from rows in a table
-	case Select([Column])
+	case select([Column])
 	/// Insert a new row with the specified value for each column
-	case Insert([(Column, SqlValue)])
+	case insert([(Column, SqlValue)])
 	/// Update a row with the specified value for each updated column
-	case Update([(Column, SqlValue)])
+	case update([(Column, SqlValue)])
 	/// Count rows
-	case Count
+	case count
 	/// Delete rows
-	case Delete
+	case delete
 }
 
 /// What to do in case of conflict
 public enum OnConflict {
 	/// Abort the operation and fail with an error
-	case Abort
+	case abort
 	/// Ignore the operation
-	case Ignore
+	case ignore
 	/// Perform the operation anyway
-	case Replace
+	case replace
 }
 
 /// A single result, which might not exist (really just an optional)
 public enum SingleResult<T> {
-	case NoResult
-	case Result(T)
+	case noResult
+	case result(T)
 	
 	public var value : T? {
 		switch self {
-		case .Result(let value): return value
-		case .NoResult: return nil
+		case .result(let value): return value
+		case .noResult: return nil
 		}
 	}
 }
@@ -61,10 +61,10 @@ public struct Statement<T : Sqlable, Return> {
 		self.orderBy = []
 		self.limit = nil
 		self.single = false
-		self.onConflict = .Abort
+		self.onConflict = .abort
 	}
 	
-	private init(operation : Operation, filter : Expression? = nil, orderBy : [Order] = [], limit : Int? = nil, single : Bool = false, onConflict : OnConflict = .Abort) {
+	private init(operation : Operation, filter : Expression? = nil, orderBy : [Order] = [], limit : Int? = nil, single : Bool = false, onConflict : OnConflict = .abort) {
 		self.operation = operation
 		self.filterBy = filter
 		self.orderBy = orderBy
@@ -75,7 +75,7 @@ public struct Statement<T : Sqlable, Return> {
 	
 	/// Add an expression filter to the statement
 	@warn_unused_result
-	public func filter(expression : Expression) -> Statement {
+	public func filter(_ expression : Expression) -> Statement {
 		guard filterBy == nil else { fatalError("You can only add one filter to an expression. Combine filters with &&") }
 		
 		return Statement(operation: operation, filter: expression, orderBy: orderBy, limit: limit, single: single, onConflict: onConflict)
@@ -83,14 +83,14 @@ public struct Statement<T : Sqlable, Return> {
 	
 	/// Add an ordering to the statement
 	@warn_unused_result
-	public func orderBy(column : Column, _ direction : Order.Direction = .Asc) -> Statement {
+	public func orderBy(_ column : Column, _ direction : Order.Direction = .asc) -> Statement {
 		let order = Order(column, direction)
 		return Statement(operation: operation, filter: filterBy, orderBy: orderBy + [order], limit: limit, single: single, onConflict: onConflict)
 	}
 	
 	/// Add a row return limit to the statement
 	@warn_unused_result
-	public func limit(limit : Int) -> Statement {
+	public func limit(_ limit : Int) -> Statement {
 		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: single, onConflict: onConflict)
 	}
 	
@@ -103,7 +103,7 @@ public struct Statement<T : Sqlable, Return> {
 	/// Ignore the operation if there are any conflicts caused by the statement
 	@warn_unused_result
 	public func ignoreOnConflict() -> Statement {
-		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: single, onConflict: .Ignore)
+		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: single, onConflict: .ignore)
 	}
 	
 	var sqlDescription : String {
@@ -111,25 +111,25 @@ public struct Statement<T : Sqlable, Return> {
 		
 		let conflict : String
 		switch onConflict {
-		case .Abort: conflict = "or abort"
-		case .Ignore: conflict = "or ignore"
-		case .Replace: conflict = "or replace"
+		case .abort: conflict = "or abort"
+		case .ignore: conflict = "or ignore"
+		case .replace: conflict = "or replace"
 		}
 		
 		switch operation {
-		case .Select(let columns):
+		case .select(let columns):
 			let columnNames = columns.map { $0.name }.joined(separator: ", ")
 			sql = ["select \(columnNames) from \(T.tableName)"]
-		case .Insert(let ops):
+		case .insert(let ops):
 			let columnNames = ops.map { column, value in column.name }.joined(separator: ", ")
 			let values = ops.map { _ in "?" }.joined(separator: ", ")
 			sql = ["insert \(conflict) into \(T.tableName) (\(columnNames)) values (\(values))"]
-		case .Update(let ops):
+		case .update(let ops):
 			let values = ops.map { column, _ in "\(column.name) = ?" }.joined(separator: ", ")
 			sql = ["update \(conflict) \(T.tableName) set \(values)"]
-		case .Count:
+		case .count:
 			sql = ["select count(*) from \(T.tableName)"]
-		case .Delete:
+		case .delete:
 			sql = ["delete from \(T.tableName)"]
 		}
 		
@@ -152,11 +152,11 @@ public struct Statement<T : Sqlable, Return> {
 		var values : [SqlValue] = []
 		
 		switch operation {
-		case .Select(_): break
-		case .Insert(let ops): values += ops.map { column, value in value }
-		case .Update(let ops): values += ops.map { column, value in value }
-		case .Count: break
-		case .Delete: break
+		case .select(_): break
+		case .insert(let ops): values += ops.map { column, value in value }
+		case .update(let ops): values += ops.map { column, value in value }
+		case .count: break
+		case .delete: break
 		}
 		
 		if let filter = filterBy {
@@ -167,7 +167,7 @@ public struct Statement<T : Sqlable, Return> {
 	}
 	
 	/// Run the statement against a database instance
-	public func run(db : SqliteDatabase) throws -> Return {
+	public func run(_ db : SqliteDatabase) throws -> Return {
 		return try db.run(self) as! Return
 	}
 }
@@ -177,9 +177,9 @@ public struct Order : SqlPrintable {
 	/// Ordering direction
 	public enum Direction {
 		/// Order ascending
-		case Asc
+		case asc
 		/// Order descending
-		case Desc
+		case desc
 	}
 	
 	let column : Column
@@ -196,6 +196,6 @@ public struct Order : SqlPrintable {
 	}
 	
 	public var sqlDescription : String {
-		return "\(column.name) " + (direction == .Desc ? "desc" : "")
+		return "\(column.name) " + (direction == .desc ? "desc" : "")
 	}
 }

@@ -56,7 +56,7 @@ class SqliteTransactionTests: XCTestCase {
 				try Table(id: nil, value1: 1, value2: 1).insert().run(db)
 				try Table(id: nil, value1: 1, value2: 1).insert().run(db)
 			}
-		} catch SqlError.SqliteConstraintViolation(_) {
+		} catch SqlError.sqliteConstraintViolation(_) {
 			constraintViolation = true
 		} catch let error {
 			XCTAssert(false, "Error: \(error)")
@@ -148,7 +148,7 @@ class SqliteTransactionTests: XCTestCase {
 					
 					try Table(id: nil, value1: 1, value2: 3).insert().run(db)
 				}
-			} catch SqlError.SqliteConstraintViolation(_) {
+			} catch SqlError.sqliteConstraintViolation(_) {
 				
 			} catch let error {
 				throw error
