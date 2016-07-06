@@ -93,9 +93,9 @@ public class SqliteDatabase {
 	///		- filePath: The path of the database file
 	/// - Throws: Eventual errors from `NSFileManager`
 	public static func deleteDatabase(at filepath : String) throws {
-		try FileManager.default().removeItem(atPath: filepath)
-		try FileManager.default().removeItem(atPath: filepath + "-shm")
-		try FileManager.default().removeItem(atPath: filepath + "-wal")
+		try FileManager.default.removeItem(atPath: filepath)
+		try FileManager.default.removeItem(atPath: filepath + "-shm")
+		try FileManager.default.removeItem(atPath: filepath + "-wal")
 	}
 	
 	/// Begin observing a change in the database.
