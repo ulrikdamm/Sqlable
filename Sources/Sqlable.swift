@@ -111,7 +111,6 @@ public extension Sqlable {
 	///		- Self needs to have a primary key
 	///		- self needs to have a value for its primary key
 	/// - Returns: An update statement instance.
-	@warn_unused_result
 	func update() -> Statement<Self, Void> {
 		guard let primaryColumn = Self.primaryColumn() else { fatalError("\(self) doesn't have a primary key") }
 		guard let primaryValue = valueForColumn(primaryColumn) else { fatalError("\(self) doesn't have a primary key value") }
@@ -123,7 +122,6 @@ public extension Sqlable {
 	/// Will run an insert statement on the object it's called from.
 	///
 	/// - Returns: An insert statement instance.
-	@warn_unused_result
 	func insert() -> Statement<Self, Int> {
 		let values = Self.tableLayout.flatMap { column in valueForColumn(column).flatMap { (column, $0) } }
 		return Statement(operation: .insert(values))
@@ -136,7 +134,6 @@ public extension Sqlable {
 	///		- Self needs to have a primary key
 	///		- self needs to have a value for its primary key
 	/// - Returns: A delete statement instance
-	@warn_unused_result
 	func delete() -> Statement<Self, Void> {
 		guard let primaryColumn = Self.primaryColumn() else { fatalError("\(self) doesn't have a primary key") }
 		guard let primaryValue = valueForColumn(primaryColumn) else { fatalError("\(self) doesn't have a primary key value") }
@@ -147,7 +144,6 @@ public extension Sqlable {
 	/// Will run a count statement on all matched objects.
 	///
 	/// - Returns: A count statement instance.
-	@warn_unused_result
 	static func count() -> Statement<Self, Int> {
 		return Statement(operation: .count)
 	}
@@ -158,7 +154,6 @@ public extension Sqlable {
 	/// - Parameters:
 	///		- filter: A filter on which objects should be deleted.
 	/// - Returns: A count statement instance.
-	@warn_unused_result
 	static func delete(_ filter : Expression) -> Statement<Self, Void> {
 		return Statement(operation: .delete).filter(filter)
 	}
@@ -167,7 +162,6 @@ public extension Sqlable {
 	/// Will run a read statement on all matched objects.
 	///
 	/// - Returns: A read statement instance.
-	@warn_unused_result
 	static func read() -> Statement<Self, [Self]> {
 		return Statement(operation: .select(Self.tableLayout))
 	}
@@ -178,7 +172,6 @@ public extension Sqlable {
 	/// - Precondition:
 	///		- self needs to have a value for its primary key
 	/// - Returns: A read statement instance.
-	@warn_unused_result
 	static func byId(_ id : SqlValue) -> Statement<Self, SingleResult<Self>> {
 		guard let primary = primaryColumn() else { fatalError("\(self.dynamicType) have no primary key") }
 		return Statement(operation: .select(Self.tableLayout))
