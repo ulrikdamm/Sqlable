@@ -100,6 +100,11 @@ public struct Statement<T : Sqlable, Return> {
 	public func ignoreOnConflict() -> Statement {
 		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: single, onConflict: .ignore)
 	}
+    
+    /// Replace row if there are any conflicts caused by the statement
+    public func replaceOnConflict() -> Statement {
+        return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: single, onConflict: .replace)
+    }
 	
 	var sqlDescription : String {
 		var sql : [String]
