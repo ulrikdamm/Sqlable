@@ -74,7 +74,6 @@ public struct Statement<T : Sqlable, Return> {
 	}
 	
 	/// Add an expression filter to the statement
-	@warn_unused_result
 	public func filter(_ expression : Expression) -> Statement {
 		guard filterBy == nil else { fatalError("You can only add one filter to an expression. Combine filters with &&") }
 		
@@ -82,26 +81,22 @@ public struct Statement<T : Sqlable, Return> {
 	}
 	
 	/// Add an ordering to the statement
-	@warn_unused_result
 	public func orderBy(_ column : Column, _ direction : Order.Direction = .asc) -> Statement {
 		let order = Order(column, direction)
 		return Statement(operation: operation, filter: filterBy, orderBy: orderBy + [order], limit: limit, single: single, onConflict: onConflict)
 	}
 	
 	/// Add a row return limit to the statement
-	@warn_unused_result
 	public func limit(_ limit : Int) -> Statement {
 		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: single, onConflict: onConflict)
 	}
 	
 	/// Only select a single row
-	@warn_unused_result
 	public func singleResult() -> Statement {
 		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: true, onConflict: onConflict)
 	}
 	
 	/// Ignore the operation if there are any conflicts caused by the statement
-	@warn_unused_result
 	public func ignoreOnConflict() -> Statement {
 		return Statement(operation: operation, filter: filterBy, orderBy: orderBy, limit: limit, single: single, onConflict: .ignore)
 	}
