@@ -7,7 +7,7 @@
 //
 
 /// Errors to occur when running SQL commands.
-public enum SqlError : ErrorProtocol {
+public enum SqlError : Error {
 	/// Error when data returned from the database didn't match the defined data types.
 	case readError(String)
 	
@@ -154,7 +154,7 @@ public class SqliteDatabase {
 	///
 	/// Parameters:
 	///		- error: The error to notify of. Should probably be a SqlError, but any error will also work.
-	public func fail(_ error : ErrorProtocol) {
+	public func fail(_ error : Error) {
 		let message : String
 		
 		if let error = error as? SqlError {
@@ -178,11 +178,11 @@ public class SqliteDatabase {
 		
 		for (_, eventHandler) in eventHandlers {
 			if update.tableName == eventHandler.tableName {
-				if let change = eventHandler.change where change != update.change {
+				if let change = eventHandler.change, change != update.change {
 					continue
 				}
 				
-				if let id = eventHandler.id where id != update.id {
+				if let id = eventHandler.id, id != update.id {
 					continue
 				}
 				
