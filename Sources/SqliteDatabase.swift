@@ -54,7 +54,7 @@ public class SqliteDatabase {
 	}
 	
 	///	Update callback. This block will be called every time there was an update in the database connection, or any child connection.
-	public var didUpdate : ((table : String, id : Int, change : Change) -> Void)?
+	public var didUpdate : ((String, Int, Change) -> Void)?
 	
 	///	Failure callback. This block will be called whenever an error is delivered via `fail(_:)`.
 	///	- SeeAlso: `fail(_:)`
@@ -83,7 +83,7 @@ public class SqliteDatabase {
 		try execute("pragma journal_mode = WAL")
 		try execute("pragma busy_timeout = 1000000")
 		
-		sqlite3_update_hook(db, onUpdate, unsafeBitCast(self, to: UnsafeMutablePointer<Void>.self))
+		sqlite3_update_hook(db, onUpdate, unsafeBitCast(self, to: UnsafeMutableRawPointer.self))
 	}
 	
 	
@@ -108,7 +108,7 @@ public class SqliteDatabase {
 	///			Any errors thrown from this call will be passed to `didFail(_:)`.
 	///			- id: The id of the inserted/updated/deleted object.
 	///	- Returns: A string handle you can use for removing the observer if you don't need it anymore.
-	public func observe<T : Sqlable>(_ change : Change? = nil, on : T.Type, id : Int? = nil, doThis : (id : Int) throws -> Void) -> String {
+	public func observe<T : Sqlable>(_ change : Change? = nil, on : T.Type, id : Int? = nil, doThis : @escaping (Int) throws -> Void) -> String {
 		let handlerId = UUID().uuidString
 		eventHandlers[handlerId] = (change, on.tableName, id, doThis)
 		
@@ -174,7 +174,7 @@ public class SqliteDatabase {
 	}
 	
 	func notifyAboutUpdate(_ update : (change : Change, tableName : String, id : Int)) {
-		didUpdate?(table: update.tableName, id: update.id, change: update.change)
+		didUpdate?(update.tableName, update.id, update.change)
 		
 		for (_, eventHandler) in eventHandlers {
 			if update.tableName == eventHandler.tableName {
@@ -289,7 +289,7 @@ public class SqliteDatabase {
 	///		The database connection is passed to the block, and any value returned will be the return value of the `transaction(block:)` call.
 	///	Returns: The value returned from the block call.
 	/// Throws: SqlError if the transaction couldn't be started, committed or rolled back, or any error thrown from the block.
-	public func transaction<T>(_ block : @noescape(SqliteDatabase) throws -> T) throws -> T {
+	public func transaction<T>(_ block : (SqliteDatabase) throws -> T) throws -> T {
 		let level = try beginTransaction()
 		
 		let value : T
@@ -440,7 +440,7 @@ private func sqlErrorForCode(_ code : Int) -> SqlError {
 	}
 }
 
-private func onUpdate(_ thisPointer : UnsafeMutablePointer<Void>?, changeRaw : Int32, database : UnsafePointer<Int8>?, tableNameRaw : UnsafePointer<Int8>?, rowid : sqlite3_int64) {
+private func onUpdate(_ thisPointer : UnsafeMutableRawPointer?, changeRaw : Int32, database : UnsafePointer<Int8>?, tableNameRaw : UnsafePointer<Int8>?, rowid : sqlite3_int64) {
 	let this = unsafeBitCast(thisPointer, to: SqliteDatabase.self)
 	
 	let change : SqliteDatabase.Change
