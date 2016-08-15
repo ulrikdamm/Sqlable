@@ -114,7 +114,7 @@ public func contains(_ lhs : Column, _ rhs : [SqlValue]) -> Expression {
 	return .in(lhs, rhs)
 }
 
-infix operator ∈ {}
+infix operator ∈
 
 /// A column must have a value in the specified list of values
 public func ∈(lhs : Column, rhs : [SqlValue]) -> Expression {

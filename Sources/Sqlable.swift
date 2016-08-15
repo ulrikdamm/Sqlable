@@ -173,7 +173,7 @@ public extension Sqlable {
 	///		- self needs to have a value for its primary key
 	/// - Returns: A read statement instance.
 	static func byId(_ id : SqlValue) -> Statement<Self, SingleResult<Self>> {
-		guard let primary = primaryColumn() else { fatalError("\(self.dynamicType) have no primary key") }
+		guard let primary = primaryColumn() else { fatalError("\(type(of: self)) have no primary key") }
 		return Statement(operation: .select(Self.tableLayout))
 			.filter(primary == id)
 			.limit(1)

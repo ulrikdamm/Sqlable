@@ -56,7 +56,7 @@ public struct ReadRow<T : Sqlable> {
 	/// - Returns: The string value for that column in the current row
 	public func get(_ column : Column) throws -> String {
 		let index = try columnIndex(column)
-		return String(validatingUTF8: UnsafePointer<CChar>(sqlite3_column_text(handle, index)))!
+		return String(cString: sqlite3_column_text(handle, index))
 	}
 	
 	/// Read a date value for a column
