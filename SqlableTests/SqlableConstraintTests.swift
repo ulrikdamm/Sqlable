@@ -16,14 +16,14 @@ struct Table {
 }
 
 extension Table : Sqlable {
-	static let id = Column("id", .Integer, PrimaryKey(autoincrement: true))
-	static let value1 = Column("value_1", .Integer)
-	static let value2 = Column("value_2", .Integer)
+	static let id = Column("id", .integer, PrimaryKey(autoincrement: true))
+	static let value1 = Column("value_1", .integer)
+	static let value2 = Column("value_2", .integer)
 	static let tableLayout = [id, value1, value2]
 	
 	static let tableConstraints : [TableConstraint] = [Unique(value1, value2)]
 	
-	func valueForColumn(column : Column) -> SqlValue? {
+	func valueForColumn(_ column : Column) -> SqlValue? {
 		switch column {
 		case Table.id: return id
 		case Table.value1: return value1
@@ -32,7 +32,7 @@ extension Table : Sqlable {
 		}
 	}
 	
-	init(row : ReadRow<Table>) throws {
+	init(row : ReadRow) throws {
 		id = try row.get(Table.id)
 		value1 = try row.get(Table.value1)
 		value2 = try row.get(Table.value2)
@@ -65,7 +65,7 @@ class SqliteConstraintsTests: XCTestCase {
 		do {
 			try Table(id: nil, value1: 1, value2: 2).insert().run(db)
 			try Table(id: nil, value1: 1, value2: 2).insert().run(db)
-		} catch SqlError.SqliteConstraintViolation(_) {
+		} catch SqlError.sqliteConstraintViolation(_) {
 			didFail = true
 		} catch let error {
 			XCTAssert(false, "Failed with error: \(error)")
@@ -81,7 +81,7 @@ class SqliteConstraintsTests: XCTestCase {
 				try Table(id: nil, value1: 1, value2: 2).insert().run(db)
 				try Table(id: nil, value1: 1, value2: 2).insert().run(db)
 			}
-		} catch SqlError.SqliteConstraintViolation(_) {
+		} catch SqlError.sqliteConstraintViolation(_) {
 			// Expected
 		} catch let error {
 			XCTAssert(false, "Failed with error: \(error)")

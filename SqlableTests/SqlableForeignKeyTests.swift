@@ -20,11 +20,11 @@ struct Table2 {
 }
 
 extension Table1 : Sqlable {
-	static let id = Column("id", .Integer, PrimaryKey(autoincrement: true))
-	static let table2id = Column("table2id", .Nullable(.Integer), ForeignKey<Table2>(onDelete: .Cascade))
+	static let id = Column("id", .integer, PrimaryKey(autoincrement: true))
+	static let table2id = Column("table2id", .nullable(.integer), ForeignKey<Table2>(onDelete: .cascade))
 	static let tableLayout = [id, table2id]
 	
-	func valueForColumn(column : Column) -> SqlValue? {
+	func valueForColumn(_ column : Column) -> SqlValue? {
 		switch column {
 		case Table1.id: return id
 		case Table1.table2id: return table2id ?? Null()
@@ -32,18 +32,18 @@ extension Table1 : Sqlable {
 		}
 	}
 	
-	init(row : ReadRow<Table1>) throws {
+	init(row : ReadRow) throws {
 		id = try row.get(Table1.id)
 		table2id = try row.get(Table1.table2id)
 	}
 }
 
 extension Table2 : Sqlable {
-	static let id = Column("id", .Integer, PrimaryKey(autoincrement: true))
-	static let table1id = Column("table1id", .Nullable(.Integer), ForeignKey<Table1>(onDelete: .SetNull))
+	static let id = Column("id", .integer, PrimaryKey(autoincrement: true))
+	static let table1id = Column("table1id", .nullable(.integer), ForeignKey<Table1>(onDelete: .setNull))
 	static let tableLayout = [id, table1id]
 	
-	func valueForColumn(column : Column) -> SqlValue? {
+	func valueForColumn(_ column : Column) -> SqlValue? {
 		switch column {
 		case Table2.id: return id
 		case Table2.table1id: return table1id ?? Null()
@@ -51,7 +51,7 @@ extension Table2 : Sqlable {
 		}
 	}
 	
-	init(row : ReadRow<Table2>) throws {
+	init(row : ReadRow) throws {
 		id = try row.get(Table2.id)
 		table1id = try row.get(Table2.table1id)
 	}

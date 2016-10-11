@@ -16,12 +16,12 @@ struct TestTable {
 }
 
 extension TestTable : Sqlable {
-	static let id = Column("id", .Integer, PrimaryKey(autoincrement: true))
-	static let value1 = Column("value_1", .Integer)
-	static let value2 = Column("value_2", .Text)
+	static let id = Column("id", .integer, PrimaryKey(autoincrement: true))
+	static let value1 = Column("value_1", .integer)
+	static let value2 = Column("value_2", .text)
 	static let tableLayout = [id, value1, value2]
 	
-	func valueForColumn(column : Column) -> SqlValue? {
+	func valueForColumn(_ column : Column) -> SqlValue? {
 		switch column {
 		case TestTable.id: return id
 		case TestTable.value1: return value1
@@ -30,7 +30,7 @@ extension TestTable : Sqlable {
 		}
 	}
 	
-	init(row : ReadRow<TestTable>) throws {
+	init(row : ReadRow) throws {
 		id = try row.get(TestTable.id)
 		value1 = try row.get(TestTable.value1)
 		value2 = try row.get(TestTable.value2)

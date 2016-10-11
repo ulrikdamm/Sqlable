@@ -9,27 +9,27 @@
 /// A SQL type
 public enum SqlType : Equatable {
 	/// An integer
-	case Integer
+	case integer
 	/// A double
-	case Real
+	case real
 	/// A string
-	case Text
+	case text
 	/// A date
-	case Date
+	case date
 	/// A boolean
-	case Boolean
+	case boolean
 	/// A nullable SQL type
-	indirect case Nullable(SqlType)
+	indirect case nullable(SqlType)
 }
 
 public func ==(lhs : SqlType, rhs : SqlType) -> Bool {
 	switch (lhs, rhs) {
-	case (.Integer, .Integer): fallthrough
-	case (.Real, .Real): fallthrough
-	case (.Text, .Text): fallthrough
-	case (.Date, .Date): fallthrough
-	case (.Boolean, .Boolean): return true
-	case (.Nullable(let t1), .Nullable(let t2)) where t1 == t2: return true
+	case (.integer, .integer): fallthrough
+	case (.real, .real): fallthrough
+	case (.text, .text): fallthrough
+	case (.date, .date): fallthrough
+	case (.boolean, .boolean): return true
+	case (.nullable(let t1), .nullable(let t2)) where t1 == t2: return true
 	case _: return false
 	}
 }
@@ -37,17 +37,17 @@ public func ==(lhs : SqlType, rhs : SqlType) -> Bool {
 extension SqlType : SqlPrintable {
 	public var sqlDescription : String {
 		switch self {
-		case .Integer: return "integer not null"
-		case .Real: return "double not null"
-		case .Text: return "text not null"
-		case .Date: return "timestamp not null"
-		case .Boolean: return "integer not null"
-		case .Nullable(.Integer): return "integer"
-		case .Nullable(.Real): return "double"
-		case .Nullable(.Text): return "text"
-		case .Nullable(.Date): return "timestamp"
-		case .Nullable(.Boolean): return "integer"
-		case .Nullable(.Nullable(_)): fatalError("Nice try")
+		case .integer: return "integer not null"
+		case .real: return "double not null"
+		case .text: return "text not null"
+		case .date: return "timestamp not null"
+		case .boolean: return "integer not null"
+		case .nullable(.integer): return "integer"
+		case .nullable(.real): return "double"
+		case .nullable(.text): return "text"
+		case .nullable(.date): return "timestamp"
+		case .nullable(.boolean): return "integer"
+		case .nullable(.nullable(_)): fatalError("Nice try")
 		}
 	}
 }
