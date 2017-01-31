@@ -22,9 +22,9 @@ And you want to persist this in a database. To do this, you just make your struc
 
 ```swift
 extension Bicycle : Sqlable {
-	static let id = Column("id", .Integer, PrimaryKey(autoincrement: true))
-	static let name = Column("name", .Text)
-	static let color = Column("color", .Text)
+	static let id = Column("id", .integer, PrimaryKey(autoincrement: true))
+	static let name = Column("name", .text)
+	static let color = Column("color", .text)
 	static let tableLayout = [id, name, color]
 	
 	func valueForColumn(column : Column) -> SqlValue? {
@@ -36,7 +36,7 @@ extension Bicycle : Sqlable {
 		}
 	}
 	
-	init(row : ReadRow<Bicycle>) throws {
+	init(row : ReadRow) throws {
 		id = try row.get(Bicycle.id)
 		name = try row.get(Bicycle.name)
 		color = try row.get(Bicycle.color)
@@ -92,11 +92,11 @@ try bike.delete().run(db)
 You can now very easily observe changes via update callbacks on inserts, deletes and updates.
 
 ```swift
-db.observe(.Insert, on: Bicycle.self) { id in
+db.observe(.insert, on: Bicycle.self) { id in
 	print("Inserted bicycle \(id)")
 }
 
-db.observe(.Update, on: Bicycle.self, id: 2) { id in
+db.observe(.update, on: Bicycle.self, id: 2) { id in
 	print("bicycle 2 has been updated")
 }
 ```
@@ -175,7 +175,7 @@ And you can also specify other columns and delete/update rules:
 
 ```swift
 extension Bicycle : Sqlable {
-	static let ownerId = Column("owner_id", .Integer, ForeignKey<Person>(column: Person.regId, onDelete: .Cascade))
+	static let ownerId = Column("owner_id", .Integer, ForeignKey<Person>(column: Person.regId, onDelete: .cascade))
 	...
 ```
 
@@ -187,7 +187,7 @@ If you want each bicycle in the database to have a unique name:
 
 ```swift
 extension Bicycle : Sqlable {
-	static let name = Column("name", .Text)
+	static let name = Column("name", .text)
 	static let tableConstraints : [TableConstraint] = [Unique(Bicycle.name)]
 	...
 ```
@@ -196,8 +196,8 @@ Or, if you want the combination of name and color to be unique:
 
 ```swift
 extension Bicycle : Sqlable {
-	static let name = Column("name", .Text)
-	static let color = Column("color", .Text)
+	static let name = Column("name", .text)
+	static let color = Column("color", .text)
 	static let tableConstraints : [TableConstraint] = [Unique(Bicycle.name, Bicycle.color)]
 	...
 ```
@@ -217,9 +217,9 @@ Register the `didUpdate` callback on your database handler to get notified when 
 ```swift
 db.didUpdate = { table, id, change in
 	switch change {
-	case .Insert: print("Inserted \(id) into \(table)")
-	case .Update: print("Updated \(id) in \(table)")
-	case .Delete: print("Deleted \(id) from \(table)")
+	case .insert: print("Inserted \(id) into \(table)")
+	case .update: print("Updated \(id) in \(table)")
+	case .delete: print("Deleted \(id) from \(table)")
 	}
 }
 ```
@@ -227,15 +227,15 @@ db.didUpdate = { table, id, change in
 But even better, you can register event callbacks on specific actions, tables and ids:
 
 ```swift
-db.observe(.Insert, on: Bicycle.self) { id in
+db.observe(.insert, on: Bicycle.self) { id in
 	print("Inserted bicycle \(id)")
 }
 
-db.observe(.Update, on: Bicycle.self, id: 2) { id in
+db.observe(.update, on: Bicycle.self, id: 2) { id in
 	print("bicycle 2 has been updated")
 }
 
-db.observe(.Delete, on: Bicycle.self) { id in
+db.observe(.delete, on: Bicycle.self) { id in
 	print("bicycle \(id) has been deleted")
 }
 

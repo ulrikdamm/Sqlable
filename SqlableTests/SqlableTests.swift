@@ -268,3 +268,31 @@ class SqliteDatabaseTests: XCTestCase {
 		}
 	}
 }
+
+struct Bicycle {
+	let id : Int?
+	var name : String
+	var color : String
+}
+
+extension Bicycle : Sqlable {
+	static let id = Column("id", .integer, PrimaryKey(autoincrement: true))
+	static let name = Column("name", .text)
+	static let color = Column("color", .text)
+	static let tableLayout = [id, name, color]
+	
+	func valueForColumn(_ column : Column) -> SqlValue? {
+		switch column {
+		case Bicycle.id: return id
+		case Bicycle.name: return name
+		case Bicycle.color: return color
+		case _: return nil
+		}
+	}
+	
+	init(row : ReadRow) throws {
+		id = try row.get(Bicycle.id)
+		name = try row.get(Bicycle.name)
+		color = try row.get(Bicycle.color)
+	}
+}
