@@ -369,6 +369,6 @@ In-string search: `column.like(value)` (e.g. Bicycle.name.like("%bike%"))
 
 ## Who made this?
 
-I did. My name is Ulrik Flænø Damm, I’m an iOS developer at Robocat in Copenhagen. You can [follow me on Twitter](https://twitter.com/ulrikdamm), or visit [my website](https://ufd.dk).
+I did. My name is Ulrik Flænø Damm, I’m an iOS and Unity developer at Northplay in Copenhagen. You can [follow me on Twitter](https://twitter.com/ulrikdamm), or visit [my website](https://ufd.dk).
 
 If you want to contribute with code or ideas, open some issues or submit some pull requests!
