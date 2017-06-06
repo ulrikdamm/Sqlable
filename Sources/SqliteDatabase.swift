@@ -108,6 +108,7 @@ public class SqliteDatabase {
 	///			Any errors thrown from this call will be passed to `didFail(_:)`.
 	///			- id: The id of the inserted/updated/deleted object.
 	///	- Returns: A string handle you can use for removing the observer if you don't need it anymore.
+	@discardableResult
 	public func observe<T : Sqlable>(_ change : Change? = nil, on : T.Type, id : Int? = nil, doThis : @escaping (Int) throws -> Void) -> String {
 		let handlerId = UUID().uuidString
 		eventHandlers[handlerId] = (change, on.tableName, id, doThis)
@@ -225,6 +226,7 @@ public class SqliteDatabase {
 	/// You can start transactions inside other transactions.
 	/// 
 	/// - Throws: SqlError if the transaction couldn't start.
+	@discardableResult
 	public func beginTransaction() throws -> Int {
 		if transactionLevel == 0 {
 			try execute("begin deferred transaction")
@@ -289,6 +291,7 @@ public class SqliteDatabase {
 	///		The database connection is passed to the block, and any value returned will be the return value of the `transaction(block:)` call.
 	///	Returns: The value returned from the block call.
 	/// Throws: SqlError if the transaction couldn't be started, committed or rolled back, or any error thrown from the block.
+	@discardableResult
 	public func transaction<T>(_ block : (SqliteDatabase) throws -> T) throws -> T {
 		let level = try beginTransaction()
 		
@@ -314,7 +317,7 @@ public class SqliteDatabase {
 		try execute(T.createTable())
 	}
 	
-	func run<T : Sqlable, Return>(_ statement : Statement<T, Return>) throws -> Any {
+	func run<T, Return>(_ statement : Statement<T, Return>) throws -> Any {
 		guard let sql = statement.sqlDescription.cString(using: String.Encoding.utf8) else { fatalError("Invalid SQL") }
 		
 		if debug {
@@ -416,8 +419,8 @@ public class SqliteDatabase {
 	}
 	
 	private func bindValues(_ db : OpaquePointer, handle : OpaquePointer, values : [SqlValue], from : Int) throws {
-		for (i, value) in values.enumerated().map({ i, value in (Int32(i + from), value) }) {
-			try value.bind(db, handle: handle, index: i)
+		for (i, value) in values.enumerated() {
+			try value.bind(db, handle: handle, index: Int32(i + from))
 		}
 	}
 }

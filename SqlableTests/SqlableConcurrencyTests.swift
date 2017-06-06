@@ -39,7 +39,7 @@ class SqliteConcurrencyTests : XCTestCase {
 			lock.signal()
 		}
 		
-		lock.wait(timeout: DispatchTime.distantFuture)
+		let _ = lock.wait(timeout: DispatchTime.distantFuture)
 		
 		XCTAssert(try! TestTable.read().run(child).count == 1)
 		XCTAssert(try! TestTable.read().run(db).count == 1)
@@ -62,7 +62,7 @@ class SqliteConcurrencyTests : XCTestCase {
 			try! TestTable(id: nil, value1: i, value2: "foreground").insert().run(db)
 		}
 		
-		lock.wait(timeout: DispatchTime.distantFuture)
+		let _ = lock.wait(timeout: DispatchTime.distantFuture)
 		
 		XCTAssert(try! TestTable.read().run(child).count == 200)
 		XCTAssert(try! TestTable.read().run(db).count == 200)

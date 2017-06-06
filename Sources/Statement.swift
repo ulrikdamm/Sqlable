@@ -11,9 +11,9 @@ public enum Operation {
 	/// Read the specified columns from rows in a table
 	case select([Column])
 	/// Insert a new row with the specified value for each column
-	case insert([(Column, SqlValue)])
+	case insert([(column : Column, value : SqlValue)])
 	/// Update a row with the specified value for each updated column
-	case update([(Column, SqlValue)])
+	case update([(column : Column, value : SqlValue)])
 	/// Count rows
 	case count
 	/// Delete rows
@@ -132,11 +132,11 @@ public struct Statement<T : Sqlable, Return> {
 			let columnNames = columns.map { $0.name }.joined(separator: ", ")
 			sql = ["select \(columnNames) from \(T.tableName)"]
 		case .insert(let ops):
-			let columnNames = ops.map { column, value in column.name }.joined(separator: ", ")
+			let columnNames = ops.map { op in op.column.name }.joined(separator: ", ")
 			let values = ops.map { _ in "?" }.joined(separator: ", ")
 			sql = ["insert \(conflict) into \(T.tableName) (\(columnNames)) values (\(values))"]
 		case .update(let ops):
-			let values = ops.map { column, _ in "\(column.name) = ?" }.joined(separator: ", ")
+			let values = ops.map { op in "\(op.column.name) = ?" }.joined(separator: ", ")
 			sql = ["update \(conflict) \(T.tableName) set \(values)"]
 		case .count:
 			sql = ["select count(*) from \(T.tableName)"]
@@ -164,8 +164,8 @@ public struct Statement<T : Sqlable, Return> {
 		
 		switch operation {
 		case .select(_): break
-		case .insert(let ops): values += ops.map { column, value in value }
-		case .update(let ops): values += ops.map { column, value in value }
+		case .insert(let ops): values += ops.map { op in op.value }
+		case .update(let ops): values += ops.map { op in op.value }
 		case .count: break
 		case .delete: break
 		}
@@ -178,6 +178,7 @@ public struct Statement<T : Sqlable, Return> {
 	}
 	
 	/// Run the statement against a database instance
+	@discardableResult
 	public func run(_ db : SqliteDatabase) throws -> Return {
 		return try db.run(self) as! Return
 	}
