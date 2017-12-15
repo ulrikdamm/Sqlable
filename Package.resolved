@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "CSQLite",
+        "repositoryURL": "https://github.com/vapor-community/csqlite",
+        "state": {
+          "branch": null,
+          "revision": "54e7b3367e4404e0a6e7017b7ee541426125ca74",
+          "version": "1.0.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -8,5 +8,7 @@ let package = Package(
 	dependencies: [
 		.package(url: "https://github.com/vapor-community/csqlite", from: "1.0.0")
 	],
-	targets: [.target(name: "Sqlable", dependencies: ["csqlite"])]
+	targets: [
+		.target(name: "Sqlable", dependencies: [])
+	]
 )

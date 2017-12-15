@@ -118,7 +118,8 @@
 				FF580D821C088D1E00751A5D /* SqlType.swift */,
 				FF580D831C088D1E00751A5D /* SqlValue.swift */,
 			);
-			path = Sources;
+			name = Sources;
+			path = Sources/Sqlable;
 			sourceTree = "<group>";
 		};
 		FF94F2E21BDE2634009AD0C9 /* SqlableTests */ = {
