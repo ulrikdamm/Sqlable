@@ -6,6 +6,10 @@
 //  Copyright © 2015 Robocat. All rights reserved.
 //
 
+import Dispatch
+import SQLite3
+import Foundation
+
 /// Errors to occur when running SQL commands.
 public enum SqlError : Error {
 	/// Error when data returned from the database didn't match the defined data types.

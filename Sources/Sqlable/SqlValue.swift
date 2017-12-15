@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SQLite3
 
 /// A value which can be used to write to a sql row
 public protocol SqlValue {

@@ -69,9 +69,7 @@ public protocol Sqlable {
 public extension Sqlable {
 	static var tableName : String {
 		let typeName = "table_\(Mirror(reflecting: self).subjectType)"
-		return typeName
-			.substring(to: typeName.index(typeName.endIndex, offsetBy: -5))
-			.lowercased()
+		return typeName[typeName.startIndex ..< typeName.index(typeName.endIndex, offsetBy: -5)].lowercased()
 	}
 	
 	static var tableConstraints : [TableConstraint] {

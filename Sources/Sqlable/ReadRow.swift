@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SQLite3
 
 /// A row returned from the SQL database, from which you can read column values
 public struct ReadRow {
