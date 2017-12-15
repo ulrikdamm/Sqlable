@@ -5,6 +5,9 @@ import PackageDescription
 
 let package = Package(
 	name: "Sqlable",
+	products: [
+		.library(name: "Sqlable", targets: ["Sqlable"])
+	],
 	dependencies: [
 		.package(url: "https://github.com/vapor-community/csqlite", from: "1.0.0")
 	],
