@@ -1,15 +1,12 @@
-//
-//  Package.swift
-//  Sqlable
-//
-//  Created by Ulrik Damm on 10/12/2015.
-//  Copyright © 2015 Ufd.dk. All rights reserved.
-//
+// swift-tools-version:4.0
+// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
-let package = Package(name: "Sqlable",
+let package = Package(
+	name: "Sqlable",
 	dependencies: [
-		.Package(url: "git@github.com:ulrikdamm/CSQLite.git", majorVersion: 1)
-	]
+		.package(url: "https://github.com/vapor-community/csqlite", from: "1.0.0")
+	],
+	targets: []
 )
