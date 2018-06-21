@@ -92,7 +92,7 @@ public indirect enum Expression : SqlPrintable {
 		case .greaterThan(_, let rhs): return [rhs]
 		case .greaterThanOrEqual(_, let rhs): return [rhs]
 		case .in(_, let rhs): return rhs
-		case .function(_, let operands): return operands.flatMap { $0.value }
+        case .function(_, let operands): return operands.compactMap { $0.value }
 		}
 	}
 }

@@ -112,7 +112,7 @@ public extension Sqlable {
 	func update() -> Statement<Self, Void> {
 		guard let primaryColumn = Self.primaryColumn() else { fatalError("\(self) doesn't have a primary key") }
 		guard let primaryValue = valueForColumn(primaryColumn) else { fatalError("\(self) doesn't have a primary key value") }
-		let values = Self.tableLayout.flatMap { column in valueForColumn(column).flatMap { (column, $0) } }
+        let values = Self.tableLayout.compactMap { column in valueForColumn(column).flatMap { (column, $0) } }
 		return Statement(operation: .update(values)).filter(primaryColumn == primaryValue)
 	}
 	
@@ -121,7 +121,7 @@ public extension Sqlable {
 	///
 	/// - Returns: An insert statement instance.
 	func insert() -> Statement<Self, Int> {
-		let values = Self.tableLayout.flatMap { column in valueForColumn(column).flatMap { (column, $0) } }
+        let values = Self.tableLayout.compactMap { column in valueForColumn(column).flatMap { (column, $0) } }
 		return Statement(operation: .insert(values))
 	}
 	
